@@ -276,6 +276,11 @@ window.si = window.si || function () { (window.siq = window.siq || []).push(argu
   }
   .client:hover img { opacity: 1; filter: grayscale(0); transform: translateY(-3px); }
 
+  /* ---- Service cards link through to their dedicated pages ------------ */
+  .svc-links { margin-top: 1.25rem; display: flex; flex-wrap: wrap; gap: 0.5rem 1.75rem; }
+  .svc-links a { color: #DB4D53; text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 200ms ease, color 200ms ease; }
+  .svc-links a:hover, .svc-links a:focus-visible { color: #fff; border-bottom-color: currentColor; }
+
   /* ---- WhatsApp: inline link in contact, plus a floating button --------
      The button sits under the mobile menu (z 20) and lightbox (z 50), and
      only appears once the hero is behind us so it never covers the
@@ -966,6 +971,7 @@ window.si = window.si || function () { (window.siq = window.siq || []).push(argu
           <ul class="mt-6 flex flex-wrap gap-x-6 gap-y-2 label text-white/55">
             <li>Full-day coverage</li><li>Second shooter</li><li>Same-week previews</li>
           </ul>
+          <p class="svc-links label"><a href="/matric-dance-photographer-johannesburg">Matric dances<span aria-hidden="true"> &rarr;</span></a><a href="/wedding-photographer-johannesburg">Weddings<span aria-hidden="true"> &rarr;</span></a></p>
         </article>
 
         <article class="svc py-9 md:py-11 group reveal">
@@ -990,6 +996,7 @@ window.si = window.si || function () { (window.siq = window.siq || []).push(argu
           <ul class="mt-6 flex flex-wrap gap-x-6 gap-y-2 label text-white/55">
             <li>Location scouting</li><li>Wardrobe guidance</li><li>Retouched selects</li>
           </ul>
+          <p class="svc-links label"><a href="/graduation-photographer-johannesburg">Graduations<span aria-hidden="true"> &rarr;</span></a></p>
         </article>
       </div>
     </div>
