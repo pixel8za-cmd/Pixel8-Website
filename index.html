@@ -14,15 +14,15 @@
 <meta property="og:locale" content="en_ZA">
 <meta property="og:title" content="Pixel8 Media | Johannesburg Event &amp; Portrait Photographer">
 <meta property="og:description" content="Events, commercial and portrait photography in Johannesburg. Considered lighting, careful editing, reliable delivery.">
-<meta property="og:image" content="https://www.pixel8media.co.za/assets/shoot-wide-1200.jpg">
+<meta property="og:image" content="https://www.pixel8media.co.za/assets/og-image.jpg">
 <meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="800">
-<meta property="og:image:alt" content="A couple in formal dress standing between a BMW M4 and a Porsche 911 at a matric dance send-off">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pixel8 Media Solutions: a matric dance couple between a BMW and a Porsche, with the headline Photography that earns its place on the wall">
 <meta property="og:url" content="https://www.pixel8media.co.za/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Pixel8 Media | Johannesburg Event &amp; Portrait Photographer">
 <meta name="twitter:description" content="Events, commercial and portrait photography in Johannesburg. Considered lighting, careful editing, reliable delivery.">
-<meta name="twitter:image" content="https://www.pixel8media.co.za/assets/shoot-wide-1200.jpg">
+<meta name="twitter:image" content="https://www.pixel8media.co.za/assets/og-image.jpg">
 
 <!-- Structured data: who the business is, where it works, what it offers -->
 <script type="application/ld+json">
@@ -35,7 +35,7 @@
       "name": "Pixel8 Media Solutions",
       "description": "Johannesburg photography and design studio covering events, matric dances, weddings, portraits and commercial product work.",
       "url": "https://www.pixel8media.co.za/",
-      "logo": "https://www.pixel8media.co.za/assets/pixel8-logo-full-white.png",
+      "logo": "https://www.pixel8media.co.za/assets/pixel8-logo-schema.png",
       "image": "https://www.pixel8media.co.za/assets/shoot-wide-1200.jpg",
       "telephone": "+27730154475",
       "email": "pixel8.za@gmail.com",
@@ -77,16 +77,40 @@
 }
 </script>
 
-<link rel="icon" href="assets/pixel8-mark-red.png" type="image/png">
-<link rel="apple-touch-icon" href="assets/pixel8-mark-red.png">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="assets/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<!-- Fonts are self-hosted: no third-party request stands between the
+     visitor and the first paint of the headline. -->
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/playfair-latin.woff2" as="font" type="font/woff2" crossorigin>
 
 <link rel="stylesheet" href="styles.css">
 
+<!-- Privacy-friendly visitor analytics + real-user speed data (Vercel) -->
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<script defer src="/_vercel/speed-insights/script.js"></script>
+
 <style>
+  /* ---- Fonts --------------------------------------------------------------
+     Variable files cover every weight in one download. The "Fallback" faces
+     are local Arial / Georgia resized to Inter / Playfair's measurements, so
+     the text doesn't jump when the real font swaps in. */
+  @font-face { font-family: "Inter"; font-style: normal; font-weight: 300 600; font-display: swap;
+               src: url(assets/fonts/inter-latin.woff2) format("woff2"); }
+  @font-face { font-family: "Playfair Display"; font-style: normal; font-weight: 400 600; font-display: swap;
+               src: url(assets/fonts/playfair-latin.woff2) format("woff2"); }
+  @font-face { font-family: "Playfair Display"; font-style: italic; font-weight: 400; font-display: swap;
+               src: url(assets/fonts/playfair-italic-latin.woff2) format("woff2"); }
+  @font-face { font-family: "Inter Fallback"; src: local("Arial");
+               size-adjust: 107.30%; ascent-override: 90.29%; descent-override: 22.48%; line-gap-override: 0%; }
+  @font-face { font-family: "Playfair Fallback"; src: local("Georgia");
+               size-adjust: 102.37%; ascent-override: 105.70%; descent-override: 24.52%; line-gap-override: 0%; }
+
   html { scroll-behavior: smooth; scroll-padding-top: 6rem; }
   body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 
@@ -252,6 +276,31 @@
   }
   .client:hover img { opacity: 1; filter: grayscale(0); transform: translateY(-3px); }
 
+  /* ---- WhatsApp: inline link in contact, plus a floating button --------
+     The button sits under the mobile menu (z 20) and lightbox (z 50), and
+     only appears once the hero is behind us so it never covers the
+     headline. Without JS it simply stays hidden; the inline link remains. */
+  .wa-inline { display: flex; width: fit-content; align-items: center; gap: 0.6rem; margin-top: 0.9rem;
+               color: rgba(255,255,255,0.75); transition: color 200ms ease; }
+  .wa-inline svg { width: 1.05rem; height: 1.05rem; color: #25D366; }
+  .wa-inline:hover, .wa-inline:focus-visible { color: #fff; }
+  .wa-fab {
+    position: fixed; right: 1.25rem; bottom: 1.25rem; z-index: 15;
+    display: inline-flex; align-items: center; gap: 0.65rem;
+    height: 3.5rem; padding: 0 1.1rem; border-radius: 999px;
+    background: #25D366; color: #0A0A0A;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    opacity: 0; transform: translateY(16px); pointer-events: none;
+    transition: opacity 300ms ease, transform 300ms cubic-bezier(.16,1,.3,1), background-color 200ms ease;
+    cursor: pointer;
+  }
+  .wa-fab svg { width: 1.6rem; height: 1.6rem; flex: none; }
+  .wa-fab span { font-size: 0.875rem; font-weight: 600; }
+  .wa-fab.wa-show { opacity: 1; transform: none; pointer-events: auto; }
+  .wa-fab:hover { background: #3be07a; }
+  .wa-fab:focus-visible { outline-color: #fff; }
+  @media (max-width: 639px) { .wa-fab { width: 3.5rem; padding: 0; justify-content: center; } .wa-fab span { display: none; } }
+
   /* ---- Honour motion preferences everywhere ----------------------------- */
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
@@ -273,6 +322,7 @@
     .hero-copy { transform: none !important; opacity: 1 !important; }
     .hero-live .parallax, .hero-live .hero-copy { will-change: auto !important; }
     #progress { display: none !important; }
+    .wa-fab { transform: none !important; }
     .tile, .tile-pending, .tile-hidden { opacity: 1 !important; transform: none !important; }
     .btn-arrow:hover svg, .btn-arrow:focus-visible svg { transform: none !important; }
     .navlink::after { transition: none !important; }
@@ -399,11 +449,11 @@
   <div class="mx-auto max-w-site px-5 sm:px-8 lg:px-12">
     <p class="label text-white/55 text-center">Trusted by</p>
     <ul class="mt-9 flex flex-wrap items-center justify-center gap-x-12 gap-y-8 sm:gap-x-16 md:gap-x-20">
-      <li class="client reveal"><img src="assets/client-elan-white.png"      alt="élan"            width="400" height="400" class="h-16 md:h-20 w-auto object-contain" loading="lazy"></li>
-      <li class="client reveal"><img src="assets/client-turf-white.png"      alt="Turf Pet Hyper"  width="400" height="400" class="h-16 md:h-20 w-auto object-contain" loading="lazy"></li>
-      <li class="client reveal"><img src="assets/client-qaswarah-white.png"  alt="Qaswarah"        width="400" height="400" class="h-16 md:h-20 w-auto object-contain" loading="lazy"></li>
-      <li class="client reveal"><img src="assets/client-delhi-white.png"     alt="Delhi Delicious" width="400" height="400" class="h-16 md:h-20 w-auto object-contain" loading="lazy"></li>
-      <li class="client reveal"><img src="assets/client-mochachos-white.png" alt="Mochachos"       width="400" height="400" class="h-16 md:h-20 w-auto object-contain" loading="lazy"></li>
+      <li class="client reveal"><picture><source type="image/webp" srcset="assets/client-elan-white.webp"><img src="assets/client-elan-white.png"      alt="élan"            width="240" height="240" class="h-16 md:h-20 w-auto object-contain" loading="lazy"></picture></li>
+      <li class="client reveal"><picture><source type="image/webp" srcset="assets/client-turf-white.webp"><img src="assets/client-turf-white.png"      alt="Turf Pet Hyper"  width="240" height="240" class="h-16 md:h-20 w-auto object-contain" loading="lazy"></picture></li>
+      <li class="client reveal"><picture><source type="image/webp" srcset="assets/client-qaswarah-white.webp"><img src="assets/client-qaswarah-white.png"  alt="Qaswarah"        width="240" height="240" class="h-16 md:h-20 w-auto object-contain" loading="lazy"></picture></li>
+      <li class="client reveal"><picture><source type="image/webp" srcset="assets/client-delhi-white.webp"><img src="assets/client-delhi-white.png"     alt="Delhi Delicious" width="240" height="240" class="h-16 md:h-20 w-auto object-contain" loading="lazy"></picture></li>
+      <li class="client reveal"><picture><source type="image/webp" srcset="assets/client-mochachos-white.webp"><img src="assets/client-mochachos-white.png" alt="Mochachos"       width="240" height="240" class="h-16 md:h-20 w-auto object-contain" loading="lazy"></picture></li>
     </ul>
   </div>
 </section>
@@ -1249,6 +1299,10 @@
             <dt class="label text-white/55">Phone &amp; WhatsApp</dt>
             <dd class="mt-2">
               <a href="tel:+27730154475" class="text-xl font-light hover:text-brand transition-colors duration-200 cursor-pointer">+27&nbsp;73&nbsp;015&nbsp;4475</a>
+              <a href="https://wa.me/27730154475?text=Hi%20Pixel8%2C%20I%27d%20like%20to%20book%20a%20shoot." target="_blank" rel="noopener noreferrer" class="wa-inline label cursor-pointer">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.7.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.41-.07-.13-.27-.2-.57-.35zM12.04 21.5h-.01a9.4 9.4 0 0 1-4.8-1.31l-.34-.2-3.57.94.95-3.48-.22-.36a9.43 9.43 0 1 1 7.99 4.41zm8.02-17.45A11.3 11.3 0 0 0 12.04.72C5.8.72.72 5.8.72 12.04c0 2 .52 3.94 1.51 5.66L.62 23.28l5.72-1.5a11.3 11.3 0 0 0 5.4 1.38h.01c6.24 0 11.32-5.08 11.32-11.32 0-3.02-1.18-5.87-3.31-8.01z"/></svg>
+                Message us on WhatsApp
+              </a>
             </dd>
           </div>
           <div>
@@ -1330,7 +1384,7 @@
     <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-10">
 
       <div>
-        <img src="assets/pixel8-logo-full-white.png" alt="Pixel8 Media Solutions" width="400" height="400" class="h-16 w-auto object-contain" loading="lazy">
+        <picture><source type="image/webp" srcset="assets/pixel8-logo-full-white.webp"><img src="assets/pixel8-logo-full-white.png" alt="Pixel8 Media Solutions" width="240" height="240" class="h-16 w-auto object-contain" loading="lazy"></picture>
         <p class="mt-5 text-white/60 font-light max-w-[36ch]">Photography &amp; design. Event, commercial and portrait photographers based in Johannesburg, working across South Africa.</p>
       </div>
 
@@ -1364,6 +1418,13 @@
   </div>
 </footer>
 
+<!-- Floating WhatsApp button (shown by script once the hero is scrolled past) -->
+<a id="waFab" class="wa-fab" href="https://wa.me/27730154475?text=Hi%20Pixel8%2C%20I%27d%20like%20to%20book%20a%20shoot." target="_blank" rel="noopener noreferrer" aria-label="Message Pixel8 on WhatsApp">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.7.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.41-.07-.13-.27-.2-.57-.35zM12.04 21.5h-.01a9.4 9.4 0 0 1-4.8-1.31l-.34-.2-3.57.94.95-3.48-.22-.36a9.43 9.43 0 1 1 7.99 4.41zm8.02-17.45A11.3 11.3 0 0 0 12.04.72C5.8.72.72 5.8.72 12.04c0 2 .52 3.94 1.51 5.66L.62 23.28l5.72-1.5a11.3 11.3 0 0 0 5.4 1.38h.01c6.24 0 11.32-5.08 11.32-11.32 0-3.02-1.18-5.87-3.31-8.01z"/></svg>
+  <span>WhatsApp us</span>
+</a>
+
+
 <!-- ═══════════════════════════════════════════════════════ LIGHTBOX (z-50) -->
 <div id="lightbox" class="fixed inset-0 z-50 bg-ink/97 hidden items-center justify-center p-4 sm:p-8" role="dialog" aria-modal="true" aria-label="Enlarged photograph">
   <button id="lbClose" type="button" class="absolute top-5 right-5 w-11 h-11 inline-flex items-center justify-center text-white/70 hover:text-white transition-colors duration-200 cursor-pointer">
@@ -1391,6 +1452,7 @@
   var heroMedia = document.getElementById('heroMedia');
   var heroCopy = document.getElementById('heroCopy');
   var hero = document.getElementById('top');
+  var waFab = document.getElementById('waFab');
   var ticking = false;
   var heroLive = null;
 
@@ -1402,6 +1464,9 @@
 
     /* Nav solidifies once the hero is behind us */
     nav.classList.toggle('nav-solid', y > 40);
+
+    /* WhatsApp button waits until the hero has been read */
+    waFab.classList.toggle('wa-show', y > window.innerHeight * 0.6);
 
     if (reduced) return;
 
@@ -1492,6 +1557,15 @@
     window.requestAnimationFrame(frame);
   }
 
+  /* ---- Overlays keep keyboard focus to themselves ------------------------
+     While the menu or lightbox is open, everything behind it is inert, so
+     Tab can't wander onto links the visitor can't see. */
+  var backdrop = [document.getElementById('nav'), document.querySelector('main'),
+                  document.querySelector('body > footer'), waFab];
+  function setBackdropInert(on) {
+    backdrop.forEach(function (el) { if (el) el.inert = on; });
+  }
+
   /* ---- Mobile menu ---------------------------------------------------- */
   var menu = document.getElementById('mobileMenu');
   var menuBtn = document.getElementById('menuBtn');
@@ -1501,12 +1575,14 @@
     menu.classList.remove('hidden');
     menuBtn.setAttribute('aria-expanded', 'true');
     document.body.style.overflow = 'hidden';
+    setBackdropInert(true);
     menuClose.focus();
   }
   function closeMenu() {
     menu.classList.add('hidden');
     menuBtn.setAttribute('aria-expanded', 'false');
     document.body.style.overflow = '';
+    setBackdropInert(false);
     menuBtn.focus();
   }
   menuBtn.addEventListener('click', openMenu);
@@ -1681,6 +1757,7 @@
     lb.classList.remove('hidden');
     lb.classList.add('flex');            /* the .flex state carries the entrance animation */
     document.body.style.overflow = 'hidden';
+    setBackdropInert(true);
     lbClose.focus();
   }
   function closeLightbox() {
@@ -1691,6 +1768,7 @@
     lb.classList.remove('flex');
     lbImg.src = '';
     document.body.style.overflow = '';
+    setBackdropInert(false);
     if (lastTrigger) lastTrigger.focus();
   }
 
