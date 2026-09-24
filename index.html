@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="en-ZA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pixel8 Media Solutions — Photography &amp; Design</title>
+<meta name="description" content="Pixel8 Media Solutions is a South African photography studio shooting events, commercial and product work, and portraits. Considered lighting, careful editing, reliable delivery.">
+<meta name="theme-color" content="#0A0A0A">
+
+<!-- Open Graph / social sharing -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Pixel8 Media Solutions — Photography &amp; Design">
+<meta property="og:description" content="Events, commercial and portrait photography. Considered lighting, careful editing, reliable delivery.">
+<meta property="og:image" content="assets/shoot-wide-1200.jpg">
+<meta property="og:url" content="https://www.pixel8media.co.za/">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="assets/pixel8-mark-red.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/pixel8-mark-red.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css">
+
+<style>
+  html { scroll-behavior: smooth; scroll-padding-top: 6rem; }
+  body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+  /* ---- Type detail ------------------------------------------------------ */
+  .display-tight { letter-spacing: -0.02em; line-height: 0.98; }
+  .label { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.22em; font-weight: 500; }
+
+  /* ---- Pixel resolve: the signature -------------------------------------
+     The Pixel8 mark dissolves into squares along its left edge. Every
+     photograph on this page enters the same way: a 22px mosaic of itself,
+     scaled up hard-edged, with the real frame resolving over it in visible
+     passes.
+
+     The mosaic also carries its weight as an LQIP — it is inline base64, so
+     it paints on first frame and there is never an empty box waiting on a
+     lazy-loaded photograph. Critically, .px-full rests at opacity 1: with no
+     JS, or if the animation never runs, the photograph simply shows. */
+  .px-grid {
+    position: absolute; inset: 0; z-index: 0;
+    background-size: cover; background-position: center;
+    image-rendering: pixelated;
+    transform: scale(1.03);        /* crop the soft outer pixel row */
+  }
+  /* No z-index here on purpose. The hero's darkening scrims and the tile
+     hover overlays are positioned siblings that come later in the DOM, so
+     they must paint over the photograph — lifting it out of source order
+     put the headline on bare sky. */
+  .px-full { position: absolute; inset: 0; }
+
+  @keyframes pxResolve { from { opacity: 0; } to { opacity: 1; } }
+
+  /* steps(5, jump-none) lands on 0, .25, .5, .75, 1 — the frame sharpens in
+     four discrete passes over the mosaic rather than a smooth dissolve. */
+  .tile-in .px-full,
+  .reveal-in .px-full,
+  .resolve-in .px-full { animation: pxResolve 780ms steps(5, jump-none) both; }
+
+  /* ---- Scroll reveal ---------------------------------------------------- */
+  .reveal { opacity: 0; transform: translateY(24px); }
+  .reveal-in { opacity: 1; transform: none; transition: opacity 800ms cubic-bezier(.16,1,.3,1), transform 800ms cubic-bezier(.16,1,.3,1); }
+
+  /* ---- Hairline rule that draws itself in ------------------------------- */
+  .rule { position: relative; height: 1px; background: rgba(255,255,255,0.12);
+          transform: scaleX(0); transform-origin: left center;
+          transition: transform 1000ms cubic-bezier(.16,1,.3,1); }
+  .rule-in { transform: scaleX(1); }
+  .rule-light { background: rgba(10,10,10,0.14); }
+
+  /* ---- Headings: words rise out of a mask, one after the next ----------- */
+  .split .w {
+    display: inline-block; overflow: hidden; vertical-align: top;
+    padding-top: 0.08em; margin-top: -0.08em;      /* keep ascenders unclipped */
+    padding-bottom: 0.14em; margin-bottom: -0.14em; /* keep descenders unclipped */
+  }
+  .split .wi {
+    display: inline-block;
+    transform: translateY(115%);
+    transition: transform 900ms cubic-bezier(.16,1,.3,1);
+    transition-delay: var(--d, 0ms);
+  }
+  .split-in .wi { transform: none; }
+
+  /* ---- Hero: background drifts slower than the page ---------------------
+     will-change is applied by script only while the hero is on screen. A
+     full-bleed image layer held promoted for the whole page costs real
+     memory on a large display, and buys nothing once it is scrolled past. */
+  .parallax { transform: scale(1.25); }
+  .hero-live .parallax, .hero-live .hero-copy { will-change: transform; }
+
+  /* ---- Nav, once the hero is behind us ---------------------------------- */
+  .nav-solid {
+    background: rgba(10, 10, 10, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+  }
+
+  /* ---- Scroll progress ------------------------------------------------- */
+  #progress {
+    position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 30;
+    background: #B5252B; transform: scaleX(0); transform-origin: left center;
+  }
+
+  /* ---- Work grid: tiles settle in, and swap softly when filtered -------- */
+  .tile { transition: opacity 400ms ease, transform 400ms cubic-bezier(.16,1,.3,1); }
+  .tile-pending { opacity: 0; transform: translateY(28px); }
+  .tile-in { opacity: 1; transform: none;
+             transition: opacity 800ms cubic-bezier(.16,1,.3,1), transform 800ms cubic-bezier(.16,1,.3,1); }
+  /* Two classes deep so a filtered-out tile still wins over .tile-in */
+  .tile.tile-hidden { opacity: 0; transform: scale(0.97);
+                      transition: opacity 280ms ease, transform 280ms ease; }
+
+  /* ---- Arrows lean into the direction of travel ------------------------- */
+  .btn-arrow svg { transition: transform 320ms cubic-bezier(.16,1,.3,1); }
+  .btn-arrow:hover svg, .btn-arrow:focus-visible svg { transform: translateX(6px); }
+
+  /* ---- Nav links: underline sweeps in from the left --------------------- */
+  .navlink { position: relative; }
+  .navlink::after {
+    content: ""; position: absolute; left: 0; bottom: -0.4rem; height: 1px; width: 100%;
+    background: currentColor; transform: scaleX(0); transform-origin: right center;
+    transition: transform 380ms cubic-bezier(.16,1,.3,1);
+  }
+  .navlink:hover::after, .navlink:focus-visible::after { transform: scaleX(1); transform-origin: left center; }
+
+  /* ---- Mobile menu: links cascade in ------------------------------------
+     Driven by a keyframe animation rather than a transition into a class
+     added by script. The resting state is visible, so if the animation
+     never runs the menu still reads — the reverse would hide it. */
+  @keyframes menuIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+  #mobileMenu:not(.hidden) .menu-link { animation: menuIn 520ms cubic-bezier(.16,1,.3,1) both; }
+  #mobileMenu:not(.hidden) .menu-link:nth-child(1) { animation-delay: 60ms; }
+  #mobileMenu:not(.hidden) .menu-link:nth-child(2) { animation-delay: 120ms; }
+  #mobileMenu:not(.hidden) .menu-link:nth-child(3) { animation-delay: 180ms; }
+  #mobileMenu:not(.hidden) .menu-link:nth-child(4) { animation-delay: 240ms; }
+  #mobileMenu:not(.hidden) .menu-link:nth-child(5) { animation-delay: 300ms; }
+  #mobileMenu:not(.hidden) .menu-link:nth-child(6) { animation-delay: 360ms; }
+
+  /* ---- Lightbox: fades up rather than snapping on -----------------------
+     Same rule — the entrance is an animation on the shown state, so the
+     overlay is never left sitting at opacity 0 waiting for a class. */
+  @keyframes lbFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes lbRise { from { transform: scale(0.94); } to { transform: none; } }
+  #lightbox.flex { animation: lbFade 300ms ease both; }
+  #lightbox.flex figure { animation: lbRise 520ms cubic-bezier(.16,1,.3,1) both; }
+
+  /* ---- Lightbox image opens like a shutter ------------------------------
+     `backwards` not `both`: the clip only applies while the animation runs,
+     so a browser that skips it still shows the full frame. */
+  @keyframes shutter { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+  #lightbox.flex #lbImg { animation: shutter 640ms cubic-bezier(.16,1,.3,1) backwards; }
+
+  /* ---- Filter chips: press feedback ------------------------------------- */
+  .filter { transition: background-color 220ms ease, color 220ms ease,
+                        border-color 220ms ease, transform 200ms cubic-bezier(.16,1,.3,1); }
+  .filter:active { transform: scale(0.97); }
+
+  /* ---- Testimonial cards lift off the band ------------------------------ */
+  #reviews figure { transition: transform 420ms cubic-bezier(.16,1,.3,1), border-color 320ms ease; }
+  #reviews figure:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.22); }
+
+  /* ---- Scroll cue breathes ---------------------------------------------- */
+  @keyframes cue { 0%, 100% { transform: scaleX(1); opacity: 0.45; }
+                   50%      { transform: scaleX(1.7); opacity: 1; } }
+  .cue { transform-origin: right center; animation: cue 2.8s ease-in-out infinite; }
+
+  /* ---- Service rows: the heading nudges across on hover ----------------- */
+  .svc h3 { transition: transform 420ms cubic-bezier(.16,1,.3,1), color 300ms ease; }
+  .svc:hover h3 { transform: translateX(8px); color: #DB4D53; }
+
+  /* ---- Image hover: scales inside its frame, never shifts layout -------- */
+  .frame { overflow: hidden; background: #141414; }
+  .frame img { transition: transform 700ms cubic-bezier(.16,1,.3,1); }
+  .frame:hover img, .frame:focus-visible img { transform: scale(1.045); }
+
+  /* ---- Focus: visible, on-brand, keyboard-only -------------------------- */
+  :focus-visible { outline: 2px solid #C1272D; outline-offset: 3px; border-radius: 2px; }
+
+  /* ---- Client row: each mark lifts to full strength on hover ------------ */
+  .client img {
+    opacity: 0.6; filter: grayscale(1);
+    transition: opacity 320ms ease, filter 320ms ease, transform 420ms cubic-bezier(.16,1,.3,1);
+  }
+  .client:hover img { opacity: 1; filter: grayscale(0); transform: translateY(-3px); }
+
+  /* ---- Honour motion preferences everywhere ----------------------------- */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .reveal { opacity: 1 !important; transform: none !important; }
+    .reveal-in { transition: none !important; }
+    .frame img { transition: none !important; }
+    .frame:hover img, .frame:focus-visible img { transform: none !important; }
+    .client:hover img { transform: none !important; }
+    .px-full { animation: none !important; }
+    #lightbox.flex #lbImg { animation: none !important; }
+    .filter:active { transform: none !important; }
+    #reviews figure:hover { transform: none !important; }
+    .cue { animation: none !important; }
+
+    /* New motion, all neutralised: content sits in its final state */
+    .rule { transform: scaleX(1) !important; }
+    .split .wi { transform: none !important; }
+    .parallax { transform: scale(1) !important; }
+    .hero-copy { transform: none !important; opacity: 1 !important; }
+    .hero-live .parallax, .hero-live .hero-copy { will-change: auto !important; }
+    #progress { display: none !important; }
+    .tile, .tile-pending, .tile-hidden { opacity: 1 !important; transform: none !important; }
+    .btn-arrow:hover svg, .btn-arrow:focus-visible svg { transform: none !important; }
+    .navlink::after { transition: none !important; }
+    #mobileMenu:not(.hidden) .menu-link { animation: none !important; }
+    #lightbox.flex, #lightbox.flex figure { animation: none !important; }
+    .svc:hover h3 { transform: none !important; }
+
+    *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+</style>
+</head>
+
+<body class="bg-ink text-white font-sans antialiased overflow-x-hidden">
+
+<a href="#work" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[60] focus:bg-white focus:text-ink focus:px-4 focus:py-2 focus:text-sm focus:font-medium">Skip to content</a>
+
+<!-- ═══════════════════════════════════════════════ NAV (z-10 / menu z-20) -->
+<div id="progress" aria-hidden="true"></div>
+
+<header id="nav" class="fixed top-0 left-0 right-0 z-10 transition-colors duration-300">
+  <div class="mx-auto max-w-site px-5 sm:px-8 lg:px-12">
+    <div class="flex items-center justify-between h-20 md:h-24">
+
+      <a href="#top" class="flex items-center gap-3 group cursor-pointer" aria-label="Pixel8 Media Solutions — home">
+        <img src="assets/pixel8-mark-white.png" alt="" width="256" height="256" class="h-8 w-8 md:h-9 md:w-9 object-contain">
+        <span class="hidden sm:block leading-none">
+          <span class="block text-[0.95rem] font-semibold tracking-[0.08em]">PIXEL<span class="text-brand">8</span></span>
+          <span class="block label text-white/60 mt-1 text-[0.5625rem]">Media Solutions</span>
+        </span>
+      </a>
+
+      <nav class="hidden md:flex items-center gap-6 lg:gap-9" aria-label="Primary">
+        <a href="#work"     class="navlink label text-white/65 hover:text-white transition-colors duration-200 cursor-pointer">Work</a>
+        <a href="#services" class="navlink label text-white/65 hover:text-white transition-colors duration-200 cursor-pointer">Services</a>
+        <a href="#story"    class="navlink label text-white/65 hover:text-white transition-colors duration-200 cursor-pointer">Story</a>
+        <a href="#standard" class="navlink label text-white/65 hover:text-white transition-colors duration-200 cursor-pointer">Standard</a>
+        <a href="#process"  class="navlink label text-white/65 hover:text-white transition-colors duration-200 cursor-pointer">Process</a>
+        <a href="#contact"  class="label bg-white text-ink px-5 py-3 hover:bg-brand hover:text-white transition-colors duration-200 cursor-pointer">Book a shoot</a>
+      </nav>
+
+      <button id="menuBtn" type="button" aria-expanded="false" aria-controls="mobileMenu"
+              class="md:hidden inline-flex items-center justify-center w-11 h-11 -mr-2 text-white cursor-pointer">
+        <span class="sr-only">Open menu</span>
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile menu -->
+<div id="mobileMenu" class="fixed inset-0 z-20 bg-ink hidden md:hidden">
+  <div class="flex items-center justify-between h-20 px-5">
+    <span class="text-[0.95rem] font-semibold tracking-[0.08em]">PIXEL<span class="text-brand">8</span></span>
+    <button id="menuClose" type="button" class="inline-flex items-center justify-center w-11 h-11 -mr-2 cursor-pointer">
+      <span class="sr-only">Close menu</span>
+      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+        <path d="M6 6l12 12M18 6L6 18"/>
+      </svg>
+    </button>
+  </div>
+  <nav class="px-5 pt-8 flex flex-col gap-1" aria-label="Mobile">
+    <a href="#work"     class="menu-link font-display text-4xl py-4 border-b border-white/10 cursor-pointer">Work</a>
+    <a href="#services" class="menu-link font-display text-4xl py-4 border-b border-white/10 cursor-pointer">Services</a>
+    <a href="#story"    class="menu-link font-display text-4xl py-4 border-b border-white/10 cursor-pointer">Story</a>
+    <a href="#standard" class="menu-link font-display text-4xl py-4 border-b border-white/10 cursor-pointer">Standard</a>
+    <a href="#process"  class="menu-link font-display text-4xl py-4 border-b border-white/10 cursor-pointer">Process</a>
+    <a href="#contact"  class="menu-link font-display text-4xl py-4 text-brand cursor-pointer">Book a shoot</a>
+  </nav>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ HERO -->
+<section id="top" class="relative min-h-[100svh] flex items-end overflow-hidden">
+  <div id="heroMedia" class="absolute inset-0 parallax">
+    <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAAPABYDASIAAhEBAxEB/8QAFwABAQEBAAAAAAAAAAAAAAAAAwAEBf/EAB8QAAICAQQDAAAAAAAAAAAAAAECAxEABBMhMQUSQv/EABcBAAMBAAAAAAAAAAAAAAAAAAABAwT/xAAZEQADAQEBAAAAAAAAAAAAAAAAAQITBBT/2gAMAwEAAhEDEQA/AEgfTT36uBR+uLxQunut1Luu850vhZtz2gdCT9E0c3aTxjxEGXafqxzyRmj0UkRwQpSAMVMi2O8sQ6NWckRLGtdBiecsT6bDCT//2Q==)"></span>
+    <img src="assets/shoot-wide-2000.jpg"
+         srcset="assets/shoot-wide-800.jpg 800w, assets/shoot-wide-1200.jpg 1200w, assets/shoot-wide-2000.jpg 2000w"
+         sizes="100vw"
+         alt="A couple in formal dress photographed between a BMW M4 and a Porsche 911 at a matric dance send-off"
+         width="2000" height="1333"
+         class="px-full w-full h-full object-cover object-center" fetchpriority="high" decoding="async">
+    <div class="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-ink/35"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-ink/75 via-transparent to-transparent"></div>
+  </div>
+
+  <div id="heroCopy" class="hero-copy relative z-[2] w-full mx-auto max-w-site px-5 sm:px-8 lg:px-12 pb-14 md:pb-20">
+    <p class="label text-white/60 reveal">Photography &amp; Design — Johannesburg, South Africa</p>
+
+    <h1 class="split font-display display-tight text-[clamp(2.5rem,6.8vw,5.75rem)] mt-5 max-w-[15ch]">
+      Photography that earns&nbsp;its place on the&nbsp;wall.
+    </h1>
+
+    <p class="mt-6 text-base md:text-lg text-white/75 font-light leading-relaxed max-w-[46ch] reveal">
+      Events, commercial and portrait work for people and brands who care how they&rsquo;re seen &mdash; shot properly, graded by hand, delivered on time.
+    </p>
+
+    <div class="mt-8 md:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center reveal">
+      <a href="#contact" class="btn-arrow label inline-flex items-center justify-center gap-3 bg-brand hover:bg-brandLift text-white px-8 py-4 transition-colors duration-200 cursor-pointer">
+        Book a shoot
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <a href="#work" class="label inline-flex items-center justify-center border border-white/25 hover:border-white hover:bg-white hover:text-ink px-8 py-4 transition-colors duration-200 cursor-pointer">
+        See the work
+      </a>
+    </div>
+  </div>
+
+  <div class="absolute bottom-6 right-5 sm:right-8 lg:right-12 z-[2] hidden sm:flex items-center gap-3 text-white/55">
+    <span class="label text-[0.5625rem]">Scroll</span>
+    <span class="cue block w-12 h-px bg-white/40"></span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════ CLIENT TRUST STRIP -->
+<!-- Five logos fit in one row, so they sit still. An auto-scrolling marquee
+     was animating them only because trust strips usually are. -->
+<section class="border-y border-white/10 bg-ink2 py-12 md:py-14" aria-label="Selected clients">
+  <div class="mx-auto max-w-site px-5 sm:px-8 lg:px-12">
+    <p class="label text-white/55 text-center">Trusted by</p>
+    <ul class="mt-9 flex flex-wrap items-center justify-center gap-x-12 gap-y-8 sm:gap-x-16 md:gap-x-20">
+      <li class="client reveal"><img src="assets/client-elan-white.png"      alt="élan"            width="400" height="400" class="h-16 md:h-20 w-auto object-contain" loading="lazy"></li>
+      <li class="client reveal"><img src="assets/client-turf-white.png"      alt="Turf Pet Hyper"  width="400" height="400" class="h-16 md:h-20 w-auto object-contain" loading="lazy"></li>
+      <li class="client reveal"><img src="assets/client-qaswarah-white.png"  alt="Qaswarah"        width="400" height="400" class="h-16 md:h-20 w-auto object-contain" loading="lazy"></li>
+      <li class="client reveal"><img src="assets/client-delhi-white.png"     alt="Delhi Delicious" width="400" height="400" class="h-16 md:h-20 w-auto object-contain" loading="lazy"></li>
+      <li class="client reveal"><img src="assets/client-mochachos-white.png" alt="Mochachos"       width="400" height="400" class="h-16 md:h-20 w-auto object-contain" loading="lazy"></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ WORK -->
+<section id="work" class="relative py-24 md:py-36">
+  <div class="mx-auto max-w-site px-5 sm:px-8 lg:px-12">
+
+    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10 reveal">
+      <div>
+        <p class="label text-brandText">Selected work</p>
+        <h2 class="split font-display display-tight text-[clamp(2.25rem,5.5vw,4.5rem)] mt-5 max-w-[14ch]">
+          Every frame, worth keeping.
+        </h2>
+      </div>
+      <p class="text-white/60 font-light leading-relaxed max-w-[38ch] lg:text-right lg:pb-3">
+        A cross-section of recent shoots. Filter by what you&rsquo;re booking &mdash; or view the full set on Instagram.
+      </p>
+    </div>
+
+    <!-- Filters -->
+    <div class="mt-14 flex flex-wrap gap-2" role="group" aria-label="Filter work by category">
+      <!-- A "Commercial" chip lived here. There is no commercial or product
+           photography in the asset set yet, so it only ever resolved to the
+           empty state. Restore it the moment those shoots come in — the
+           filter logic already keys off data-cat="commercial". -->
+      <button type="button" class="filter label px-5 py-3 border transition-colors duration-200 cursor-pointer bg-white text-ink border-white" data-filter="all" aria-pressed="true">All</button>
+      <button type="button" class="filter label px-5 py-3 border transition-colors duration-200 cursor-pointer border-white/20 text-white/65 hover:border-white hover:text-white" data-filter="events" aria-pressed="false">Events</button>
+      <button type="button" class="filter label px-5 py-3 border transition-colors duration-200 cursor-pointer border-white/20 text-white/65 hover:border-white hover:text-white" data-filter="portraits" aria-pressed="false">Portraits</button>
+    </div>
+
+    <!-- Grid -->
+    <div id="grid" class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 [grid-auto-flow:dense] gap-3 md:gap-4">
+
+      <figure class="tile sm:col-span-2" data-cat="events">
+        <button type="button" class="lightbox-trigger group frame relative block w-full aspect-[4/3] cursor-pointer"
+                data-src="assets/shoot-wide-2000.jpg"
+                data-caption="Matric dance send-off">
+          <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAAPABYDASIAAhEBAxEB/8QAFwABAQEBAAAAAAAAAAAAAAAAAwAEBf/EAB8QAAICAQQDAAAAAAAAAAAAAAECAxEABBMhMQUSQv/EABcBAAMBAAAAAAAAAAAAAAAAAAABAwT/xAAZEQADAQEBAAAAAAAAAAAAAAAAAQITBBT/2gAMAwEAAhEDEQA/AEgfTT36uBR+uLxQunut1Luu850vhZtz2gdCT9E0c3aTxjxEGXafqxzyRmj0UkRwQpSAMVMi2O8sQ6NWckRLGtdBiecsT6bDCT//2Q==)"></span>
+          <img src="assets/shoot-wide-1200.jpg"
+               srcset="assets/shoot-wide-800.jpg 800w, assets/shoot-wide-1200.jpg 1200w, assets/shoot-wide-2000.jpg 2000w"
+               sizes="(min-width:1024px) 56vw, (min-width:640px) 92vw, 100vw"
+               alt="A couple in formal dress standing between a grey BMW M4 and a white Porsche 911"
+               width="1200" height="800" loading="lazy" decoding="async"
+               class="px-full absolute inset-0 w-full h-full object-cover">
+          <span class="absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/10 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300"></span>
+          <span class="absolute left-6 bottom-6 z-[3] text-left translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 transition duration-300">
+            <span class="block label text-brandText">Events</span>
+            <span class="block font-display text-2xl mt-1.5">Matric dance send-off</span>
+          </span>
+        </button>
+      </figure>
+      <figure class="tile" data-cat="portraits">
+        <button type="button" class="lightbox-trigger group frame relative block w-full aspect-[3/4] cursor-pointer"
+                data-src="assets/shoot-tall-1400.jpg"
+                data-caption="Couple portrait">
+          <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAAhABYDASIAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAAAAQFAQP/xAApEAACAQMDAgQHAAAAAAAAAAABAgMABBESITEFExRBgaEGFTJRcZGx/8QAFwEAAwEAAAAAAAAAAAAAAAAAAAEDAv/EAB4RAAIBAwUAAAAAAAAAAAAAAAABAgMEERITITFR/9oADAMBAAIRAxEAPwDYRo5PoYN+K83nhWPXqyucetYUvVLcQMlurrLnZjyPeqFY3MUsmSsCkaQ25J8z61WVaSXKwTjSi+maUV3BKSA2MfelZcb2m7EyE/qlRV3JD2V6UfEBWFHktltBEmN1ALE1HazCzsIpwue5qydsAnIH8qifpVzNbeGUW8UTNqYpqJ9658mn8EtsJFxrLEk8bYrTeSiWDQtrO1eBH7XKg7k0rnTLOWyh7TyiRORtuKVPSgK/Oi8UpWgO0pSkB//Z)"></span>
+          <img src="assets/shoot-tall-800.jpg"
+               srcset="assets/shoot-tall-500.jpg 500w, assets/shoot-tall-800.jpg 800w, assets/shoot-tall-1400.jpg 1400w"
+               sizes="(min-width:1024px) 28vw, (min-width:640px) 46vw, 100vw"
+               alt="Portrait of a couple in formal dress leaning against a white Porsche 911"
+               width="800" height="1200" loading="lazy" decoding="async"
+               class="px-full absolute inset-0 w-full h-full object-cover">
+          <span class="absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/10 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300"></span>
+          <span class="absolute left-6 bottom-6 z-[3] text-left translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 transition duration-300">
+            <span class="block label text-brandText">Portraits</span>
+            <span class="block font-display text-2xl mt-1.5">Couple portrait</span>
+          </span>
+        </button>
+      </figure>
+      <figure class="tile" data-cat="events">
+        <button type="button" class="lightbox-trigger group frame relative block w-full aspect-[3/4] cursor-pointer"
+                data-src="assets/work-proposal-knee-1400.jpg"
+                data-caption="The proposal">
+          <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAAhABYDASIAAhEBAxEB/8QAGgABAAIDAQAAAAAAAAAAAAAAAAMGAgQFAf/EAC4QAAIBAwEFBAsAAAAAAAAAAAECAAMEEQUSFCEiQSQxcrIGIyUmM1FhgbHB4f/EABgBAQADAQAAAAAAAAAAAAAAAAEAAwUE/8QAHhEAAgIBBQEAAAAAAAAAAAAAAAECETMDBBMxMnH/2gAMAwEAAhEDEQA/AO9qZ5rMZ47wv7m4p9bU+0q+oVHb0sthUPKhTYGehM69/fvZ1UZAhR3VXZu4f2QaNjST2BfE/mMTDSm7EPG/mMRArmoVPe23OeHJNDXrmi9w62leqyNU2nRhyhh8p6ztWu6d2SzOgAIxjJH1kFzRNaqHSkF5snJzC0W8U2rSLdo1X2bT2u/LfkxK3vFZVCitUpgccK2IimVuLTpmFH4YknSInNLtm7o44/CG46RES+Hkyt1lZ//Z)"></span>
+          <img src="assets/work-proposal-knee-800.jpg"
+               srcset="assets/work-proposal-knee-500.jpg 500w, assets/work-proposal-knee-800.jpg 800w, assets/work-proposal-knee-1400.jpg 1400w"
+               sizes="(min-width:1024px) 28vw, (min-width:640px) 46vw, 100vw"
+               alt="A man on one knee holding out a ring in front of illuminated MARRY ME letters"
+               width="800" height="1200" loading="lazy" decoding="async"
+               class="px-full absolute inset-0 w-full h-full object-cover">
+          <span class="absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/10 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300"></span>
+          <span class="absolute left-6 bottom-6 z-[3] text-left translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 transition duration-300">
+            <span class="block label text-brandText">Events</span>
+            <span class="block font-display text-2xl mt-1.5">The proposal</span>
+          </span>
+        </button>
+      </figure>
+      <figure class="tile sm:col-span-2" data-cat="events">
+        <button type="button" class="lightbox-trigger group frame relative block w-full aspect-[4/3] cursor-pointer"
+                data-src="assets/work-carwindows-2000.jpg"
+                data-caption="Two cars, one moment">
+          <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAAPABYDASIAAhEBAxEB/8QAFwAAAwEAAAAAAAAAAAAAAAAAAAQFA//EACEQAAIBBAICAwAAAAAAAAAAAAECAwAEESESQQUTI1GR/8QAFQEBAQAAAAAAAAAAAAAAAAAAAgT/xAAaEQADAAMBAAAAAAAAAAAAAAAAAQIEETFR/9oADAMBAAIRAxEAPwCcYb+3RCsuCwJVAxyQO60j8n5BQFlTl9E63VSef02rO3Fyikgld/tRZboSRFznZxga7puUgrwUnVpDmWReR3sk0U+0cHsPwqRjsmii3K6UTj3S2j//2Q==)"></span>
+          <img src="assets/work-carwindows-1200.jpg"
+               srcset="assets/work-carwindows-800.jpg 800w, assets/work-carwindows-1200.jpg 1200w, assets/work-carwindows-2000.jpg 2000w"
+               sizes="(min-width:1024px) 56vw, (min-width:640px) 92vw, 100vw"
+               alt="A bride and groom reaching for each other's hands through the windows of a white and a red Porsche"
+               width="1200" height="800" loading="lazy" decoding="async"
+               class="px-full absolute inset-0 w-full h-full object-cover">
+          <span class="absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/10 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300"></span>
+          <span class="absolute left-6 bottom-6 z-[3] text-left translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 transition duration-300">
+            <span class="block label text-brandText">Events</span>
+            <span class="block font-display text-2xl mt-1.5">Two cars, one moment</span>
+          </span>
+        </button>
+      </figure>
+      <figure class="tile" data-cat="portraits">
+        <button type="button" class="lightbox-trigger group frame relative block w-full aspect-[3/4] cursor-pointer"
+                data-src="assets/work-bw-foreheads-1400.jpg"
+                data-caption="Forehead to forehead">
+          <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAAhABYDASIAAhEBAxEB/8QAFwABAQEBAAAAAAAAAAAAAAAAAAYFA//EACYQAAIBAwQBAwUAAAAAAAAAAAECAAMEEQUSITEyEyJBUXFygaH/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8Ak3d3ckknM6UqFRQKnSmXVHTNPsrXa1BKhI9zuuSeP5J9bakfMnBJCoePtAxA53NkxN19BauxYEKfkA9RAptWRVtCTuXPPEmq4tk2VUdjVU546GJu3lf1XfccIqmSNzUFNMZ75x9YGxZ6xb0rbazkVN3IxEmGYnmIFpe+Ff8AEyQu/L9REDl8CIiB/9k=)"></span>
+          <img src="assets/work-bw-foreheads-800.jpg"
+               srcset="assets/work-bw-foreheads-500.jpg 500w, assets/work-bw-foreheads-800.jpg 800w, assets/work-bw-foreheads-1400.jpg 1400w"
+               sizes="(min-width:1024px) 28vw, (min-width:640px) 46vw, 100vw"
+               alt="Black and white portrait of a bride and groom resting their foreheads together"
+               width="800" height="1200" loading="lazy" decoding="async"
+               class="px-full absolute inset-0 w-full h-full object-cover">
+          <span class="absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/10 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300"></span>
+          <span class="absolute left-6 bottom-6 z-[3] text-left translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 transition duration-300">
+            <span class="block label text-brandText">Portraits</span>
+            <span class="block font-display text-2xl mt-1.5">Forehead to forehead</span>
+          </span>
+        </button>
+      </figure>
+      <figure class="tile" data-cat="events">
+        <button type="button" class="lightbox-trigger group frame relative block w-full aspect-[3/4] cursor-pointer"
+                data-src="assets/work-grad-toss-1400.jpg"
+                data-caption="Cap in the air">
+          <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAAhABYDASIAAhEBAxEB/8QAGQABAQEAAwAAAAAAAAAAAAAAAAUEAgMG/8QALBAAAgEDAgIIBwAAAAAAAAAAAQIDAAQRIUEFMQYSEyI0UXHBFDI1QnKRsf/EABYBAQEBAAAAAAAAAAAAAAAAAAMCAf/EABgRAQEBAQEAAAAAAAAAAAAAAAABAiER/9oADAMBAAIRAxEAPwDTcK0plRV1RQwNQBH328s71dnL295MysS6ooBG+vKpzLkzzGPug64GAtQuMQj60+DsvvSu0KDckg/bSp9V4odIpeynXGhMqnTfFZbadbiGaJRI7ynk3PGo0O9culZPx0MefNv3ge1TLHs2eQTSFT1e6ij5qbM4KteqzFSCrKMEHmKVR4bw1ru0S7UOzSZyCRgYJ350obOkmuJXHPGx/h71itvGp6ClKfIq9Bwz6bF6n+mlKVNa/9k=)"></span>
+          <img src="assets/work-grad-toss-800.jpg"
+               srcset="assets/work-grad-toss-500.jpg 500w, assets/work-grad-toss-800.jpg 800w, assets/work-grad-toss-1400.jpg 1400w"
+               sizes="(min-width:1024px) 28vw, (min-width:640px) 46vw, 100vw"
+               alt="A graduate throwing his diploma scroll into the air outside a sandstone university building"
+               width="800" height="1195" loading="lazy" decoding="async"
+               class="px-full absolute inset-0 w-full h-full object-cover">
+          <span class="absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/10 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300"></span>
+          <span class="absolute left-6 bottom-6 z-[3] text-left translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 transition duration-300">
+            <span class="block label text-brandText">Events</span>
+            <span class="block font-display text-2xl mt-1.5">Cap in the air</span>
+          </span>
+        </button>
+      </figure>
+      <figure class="tile sm:col-span-2" data-cat="portraits">
+        <button type="button" class="lightbox-trigger group frame relative block w-full aspect-[4/3] cursor-pointer"
+                data-src="assets/work-grass-2000.jpg"
+                data-caption="On the lawn">
+          <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAAPABYDASIAAhEBAxEB/8QAFwAAAwEAAAAAAAAAAAAAAAAAAAIFBv/EAB4QAAIDAAMAAwAAAAAAAAAAAAECAAMEESExBRNh/8QAFgEBAQEAAAAAAAAAAAAAAAAAAgAB/8QAGREBAQADAQAAAAAAAAAAAAAAAQASMVFh/9oADAMBAAIRAxEAPwDL5sjaL1qQgFvOTFOW1tDUhSzKSOvyNU1iWqaz3z1L2bFfkY3F0Yv23I8iXlh7Z/6ypKnkMPQYSl81Q9W4mxVBKjyEGTTu/9k=)"></span>
+          <img src="assets/work-grass-1200.jpg"
+               srcset="assets/work-grass-800.jpg 800w, assets/work-grass-1200.jpg 1200w, assets/work-grass-2000.jpg 2000w"
+               sizes="(min-width:1024px) 56vw, (min-width:640px) 92vw, 100vw"
+               alt="A couple lying head to head on grass, the bride in a navy gown and the groom in a light grey suit"
+               width="1200" height="800" loading="lazy" decoding="async"
+               class="px-full absolute inset-0 w-full h-full object-cover">
+          <span class="absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/10 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300"></span>
+          <span class="absolute left-6 bottom-6 z-[3] text-left translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 transition duration-300">
+            <span class="block label text-brandText">Portraits</span>
+            <span class="block font-display text-2xl mt-1.5">On the lawn</span>
+          </span>
+        </button>
+      </figure>
+      <figure class="tile" data-cat="portraits">
+        <button type="button" class="lightbox-trigger group frame relative block w-full aspect-[3/4] cursor-pointer"
+                data-src="assets/work-couple-garden-1400.jpg"
+                data-caption="Garden portrait">
+          <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAAeABYDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAQFAwb/xAAmEAACAgIBAwIHAAAAAAAAAAABAgQRAAMFEiExE1EiQWFxkdHw/8QAFwEBAQEBAAAAAAAAAAAAAAAAAQACA//EABoRAAICAwAAAAAAAAAAAAAAAAARAQIhMUH/2gAMAwEAAhEDEQA/AI/Hz9sWWuxDSkgMPcYxzUlZk3q0n4AB3rJ8PWZElNQIBY1fms32atYbYiuxIFg1+cyCeRV+kqCbv3wxfa5LUb7YZITq+EjJFjOzKG2OTRA8AV+8ncyfR3dWkFQwKn6/15fl6G46GnpMCV7sT8/fIfPF9miPvciyKoeBjGlIcZMjRzI6mvxWGMQLVH++GcrWlkf/2Q==)"></span>
+          <img src="assets/work-couple-garden-800.jpg"
+               srcset="assets/work-couple-garden-500.jpg 500w, assets/work-couple-garden-800.jpg 800w, assets/work-couple-garden-1400.jpg 1400w"
+               sizes="(min-width:1024px) 28vw, (min-width:640px) 46vw, 100vw"
+               alt="A bride and groom smiling together in a garden, the bride holding a bouquet"
+               width="800" height="1102" loading="lazy" decoding="async"
+               class="px-full absolute inset-0 w-full h-full object-cover">
+          <span class="absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/10 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300"></span>
+          <span class="absolute left-6 bottom-6 z-[3] text-left translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 transition duration-300">
+            <span class="block label text-brandText">Portraits</span>
+            <span class="block font-display text-2xl mt-1.5">Garden portrait</span>
+          </span>
+        </button>
+      </figure>
+      <figure class="tile" data-cat="portraits">
+        <button type="button" class="lightbox-trigger group frame relative block w-full aspect-[3/4] cursor-pointer"
+                data-src="assets/work-md-bmw-1400.jpg"
+                data-caption="Matric dance portrait">
+          <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAAhABYDASIAAhEBAxEB/8QAGQABAQEBAQEAAAAAAAAAAAAAAAUEBgID/8QAKBAAAgICAAQFBQEAAAAAAAAAAQIAAwQRBRIxQRMhIlFxMmGBkaHh/8QAGAEAAwEBAAAAAAAAAAAAAAAAAAEDAgT/xAAaEQACAwEBAAAAAAAAAAAAAAAAAQIREhNR/9oADAMBAAIRAxEAPwCXc93jaFTIX8h7Tzdj5ddzgVu3L1YDcv3cXptpNdavWxGxzAD7/MjUcUyq8yx8UEVtvSPsgCLIWTLLXPpJI5exibbHotsey6nTMQfTsCIUM+l2bd4LB3NiHsfOZsBxflIMl2FY8tjt/k0ZuBkYlbFmrZNdQdH9TElb11uzjlC60D33KynbTROMKTR0b4uKDpcax16hx3/sSArXOoNV6p7gvqJvo/SeDpM/rX+ZF439NfxESDOgjxERAf/Z)"></span>
+          <img src="assets/work-md-bmw-800.jpg"
+               srcset="assets/work-md-bmw-500.jpg 500w, assets/work-md-bmw-800.jpg 800w, assets/work-md-bmw-1400.jpg 1400w"
+               sizes="(min-width:1024px) 28vw, (min-width:640px) 46vw, 100vw"
+               alt="A young man in a black tuxedo leaning against a blue BMW"
+               width="800" height="1200" loading="lazy" decoding="async"
+               class="px-full absolute inset-0 w-full h-full object-cover">
+          <span class="absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/10 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300"></span>
+          <span class="absolute left-6 bottom-6 z-[3] text-left translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 transition duration-300">
+            <span class="block label text-brandText">Portraits</span>
+            <span class="block font-display text-2xl mt-1.5">Matric dance portrait</span>
+          </span>
+        </button>
+      </figure>
+      <figure class="tile sm:col-span-2" data-cat="events">
+        <button type="button" class="lightbox-trigger group frame relative block w-full aspect-[4/3] cursor-pointer"
+                data-src="assets/work-driveway-2000.jpg"
+                data-caption="Wedding send-off">
+          <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAAOABYDASIAAhEBAxEB/8QAFwAAAwEAAAAAAAAAAAAAAAAAAAMFBP/EACEQAAIBBQABBQAAAAAAAAAAAAECAwAEERIhFAUxUWGx/8QAFwEAAwEAAAAAAAAAAAAAAAAAAAECA//EABcRAQADAAAAAAAAAAAAAAAAAAAREkH/2gAMAwEAAhEDEQA/AFS2XkgQqxQs2NivM1O8OWOTBdH1xuDzHz2tNneNcXEU1w7ukT7ajAyaneoTia/kK7BAxIU09BxcxzOsJBQexPP2ik6GTuSPoUVrVEv/2Q==)"></span>
+          <img src="assets/work-driveway-1200.jpg"
+               srcset="assets/work-driveway-800.jpg 800w, assets/work-driveway-1200.jpg 1200w, assets/work-driveway-2000.jpg 2000w"
+               sizes="(min-width:1024px) 56vw, (min-width:640px) 92vw, 100vw"
+               alt="A bride and groom on a driveway flanked by a white Porsche, a blue BMW and a grey Porsche"
+               width="1200" height="791" loading="lazy" decoding="async"
+               class="px-full absolute inset-0 w-full h-full object-cover">
+          <span class="absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/10 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300"></span>
+          <span class="absolute left-6 bottom-6 z-[3] text-left translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 transition duration-300">
+            <span class="block label text-brandText">Events</span>
+            <span class="block font-display text-2xl mt-1.5">Wedding send-off</span>
+          </span>
+        </button>
+      </figure>
+      <figure class="tile" data-cat="portraits">
+        <button type="button" class="lightbox-trigger group frame relative block w-full aspect-[3/4] cursor-pointer"
+                data-src="assets/work-grad-fountain-1400.jpg"
+                data-caption="Graduation portrait">
+          <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAAhABYDASIAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAAAAQDBQH/xAArEAACAQMDAgILAAAAAAAAAAABAgMABBEFEiExcSIzExQ0UWGBkbHB0eH/xAAXAQEBAQEAAAAAAAAAAAAAAAACAwEA/8QAGhEBAQADAQEAAAAAAAAAAAAAAQACESESQf/aAAwDAQACEQMRAD8AllvYbq73LEylvFgYwPp2r2KOzaIyKAztJswTnFSRbbVGYjawXHIPI91Irn1bTTLgLMGwoI5JPJPyH3ouGmWOWztfJCsoweMHORSpotQRog7kBj1FKoYkHJumbWDUZd0W9I4x1IAy38/NcbXYWhMamR2Xcw8TZ5wP3WkupyWDRR2b+kUZL5HBNQaxO0moyF2O3AIXPTIFSNr2ogHKi0hQ2qMzAE/ClTRzERKuegpT9MPBbN5g71LqftbdzSlZ9l8rYvJTtSlK62//2Q==)"></span>
+          <img src="assets/work-grad-fountain-800.jpg"
+               srcset="assets/work-grad-fountain-500.jpg 500w, assets/work-grad-fountain-800.jpg 800w, assets/work-grad-fountain-1400.jpg 1400w"
+               sizes="(min-width:1024px) 28vw, (min-width:640px) 46vw, 100vw"
+               alt="A graduate in cap and gown seated at the edge of a fountain, holding her cap"
+               width="800" height="1200" loading="lazy" decoding="async"
+               class="px-full absolute inset-0 w-full h-full object-cover">
+          <span class="absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/10 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300"></span>
+          <span class="absolute left-6 bottom-6 z-[3] text-left translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 transition duration-300">
+            <span class="block label text-brandText">Portraits</span>
+            <span class="block font-display text-2xl mt-1.5">Graduation portrait</span>
+          </span>
+        </button>
+      </figure>
+      <figure class="tile" data-cat="portraits">
+        <button type="button" class="lightbox-trigger group frame relative block w-full aspect-[3/4] cursor-pointer"
+                data-src="assets/work-proposal-pair-1400.jpg"
+                data-caption="After the yes">
+          <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAAhABYDASIAAhEBAxEB/8QAGgAAAgMBAQAAAAAAAAAAAAAAAAYDBAUBB//EACUQAAIBBAEDBAMAAAAAAAAAAAECAwAEBREhEjFBBhMyUSNhcf/EABYBAQEBAAAAAAAAAAAAAAAAAAMCAP/EABkRAAMBAQEAAAAAAAAAAAAAAAABEQIhMf/aAAwDAQACEQMRAD8Aj9S3dy+ejhDvGkSgxlO+z3NM2LmaXHwvJIZGI5cjW6UcpeR5rMKlrIoEa/jfpO3PkVes809nIbURIYIG6XYnTHfkCtZrpUueejV1UVEHU8g8HtRSBU8rhkaKVZIzp0IINaD5JBeXEqAhZdkDXkis2FzHIGHcHfNWL6WG4eN4l6H6dOuuN/YoWrwXLnUN2FzKX1uEIKyRgAj7/dFK2KVvdfT+3xyTRSJkvJQ+q4/yFFFSY0Mf8m/goooqR8+H/9k=)"></span>
+          <img src="assets/work-proposal-pair-800.jpg"
+               srcset="assets/work-proposal-pair-500.jpg 500w, assets/work-proposal-pair-800.jpg 800w, assets/work-proposal-pair-1400.jpg 1400w"
+               sizes="(min-width:1024px) 28vw, (min-width:640px) 46vw, 100vw"
+               alt="A couple photographed after the proposal, the new ring on her hand"
+               width="800" height="1200" loading="lazy" decoding="async"
+               class="px-full absolute inset-0 w-full h-full object-cover">
+          <span class="absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/10 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300"></span>
+          <span class="absolute left-6 bottom-6 z-[3] text-left translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 transition duration-300">
+            <span class="block label text-brandText">Portraits</span>
+            <span class="block font-display text-2xl mt-1.5">After the yes</span>
+          </span>
+        </button>
+      </figure>
+      <figure class="tile sm:col-span-2" data-cat="events">
+        <button type="button" class="lightbox-trigger group frame relative block w-full aspect-[4/3] cursor-pointer"
+                data-src="assets/work-supercars-2000.jpg"
+                data-caption="The send-off line">
+          <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAALABYDASIAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAQCAwUG/8QAIBAAAwACAQQDAAAAAAAAAAAAAQIDABEEBRITMSJRYf/EABUBAQEAAAAAAAAAAAAAAAAAAAMC/8QAFhEBAQEAAAAAAAAAAAAAAAAAAQAR/9oADAMBAAIRAxEAPwDnIQrLlzSikNresY5/EpO9Vi7NoAsD7yUL0PUSS2yXCk6HrGeqUefLqEOg8/l+42GRa7Ysp1qCV7iB9YZb5Xkx7GI37wyJgG//2Q==)"></span>
+          <img src="assets/work-supercars-1200.jpg"
+               srcset="assets/work-supercars-800.jpg 800w, assets/work-supercars-1200.jpg 1200w, assets/work-supercars-2000.jpg 2000w"
+               sizes="(min-width:1024px) 56vw, (min-width:640px) 92vw, 100vw"
+               alt="A bride and groom embracing between two parked Porsches under a building canopy"
+               width="1200" height="592" loading="lazy" decoding="async"
+               class="px-full absolute inset-0 w-full h-full object-cover">
+          <span class="absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/10 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300"></span>
+          <span class="absolute left-6 bottom-6 z-[3] text-left translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 transition duration-300">
+            <span class="block label text-brandText">Events</span>
+            <span class="block font-display text-2xl mt-1.5">The send-off line</span>
+          </span>
+        </button>
+      </figure>
+      <figure class="tile" data-cat="portraits">
+        <button type="button" class="lightbox-trigger group frame relative block w-full aspect-[3/4] cursor-pointer"
+                data-src="assets/work-couple-embrace-1400.jpg"
+                data-caption="Close">
+          <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAAhABYDASIAAhEBAxEB/8QAGgAAAgIDAAAAAAAAAAAAAAAAAAUEBgECA//EACgQAAEEAQIEBgMAAAAAAAAAAAEAAgMRBAUSBiEiMTI1QVGBsUJhcf/EABgBAAMBAQAAAAAAAAAAAAAAAAABAgME/8QAGxEBAAICAwAAAAAAAAAAAAAAAAERAiEDMTL/2gAMAwEAAhEDEQA/AKvZeSfZbCQD0pdocKaYPfQZCzxSHkPj3U2GKGYbQwGIXTqN0oo4iy3f09QBQpOpY8WI6Mxklsjbo+hQikpWFrIZDFBNixlrCAK+6VlLIZobO2j3BCq2DpMuoNLg4Ma38q7lOI8HMigEBdbQKtrqVxM0cbK+JImg474+bCC3l+kLOsbYYYcMRyXGS7c497QpynZHWheWx/P2mR7IQtceiI+IPFD/AAoQhc3J6D//2Q==)"></span>
+          <img src="assets/work-couple-embrace-800.jpg"
+               srcset="assets/work-couple-embrace-500.jpg 500w, assets/work-couple-embrace-800.jpg 800w, assets/work-couple-embrace-1400.jpg 1400w"
+               sizes="(min-width:1024px) 28vw, (min-width:640px) 46vw, 100vw"
+               alt="A groom holding his bride from behind, both laughing, greenery behind them"
+               width="800" height="1213" loading="lazy" decoding="async"
+               class="px-full absolute inset-0 w-full h-full object-cover">
+          <span class="absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/10 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300"></span>
+          <span class="absolute left-6 bottom-6 z-[3] text-left translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 transition duration-300">
+            <span class="block label text-brandText">Portraits</span>
+            <span class="block font-display text-2xl mt-1.5">Close</span>
+          </span>
+        </button>
+      </figure>
+      <figure class="tile" data-cat="events">
+        <button type="button" class="lightbox-trigger group frame relative block w-full aspect-[3/4] cursor-pointer"
+                data-src="assets/work-md-couple-1400.jpg"
+                data-caption="Matric dance">
+          <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAAhABYDASIAAhEBAxEB/8QAGQABAAMBAQAAAAAAAAAAAAAAAAQFBgMB/8QALxAAAgEDAgIHCAMAAAAAAAAAAQIDAAQRBSESEwYiMUFSscEUNDVDYXFzdJGy8P/EABUBAQEAAAAAAAAAAAAAAAAAAAEC/8QAGhEBAQEAAwEAAAAAAAAAAAAAAAERAhJBUf/aAAwDAQACEQMRAD8Anz3amJYrFxEmcA+KoEsl6icxLgyKpyw2zjixttUCSSK01mCR0zAnC3LyWwCNxvUvT3kMsksUaHmAlVbsCljsKLJmq427i6guTFHiYmUdxI3FKqriwvLi6d1uOXD3KpOx/wBmlPaeROfa5dJtPWK6t2gLF5lIAP03qqj1O4W0SGPhUJnrBese/trT63xJeWJxkRxzH+ErElyHUDbHoBVQN7oae1aTbycx1bhwcY3wcZ7KVy6Iy8zRFHgcj19aVJea77/bfrz/ANaw3zB9j5UpVQNp0K+EyflPkKUpUl//2Q==)"></span>
+          <img src="assets/work-md-couple-800.jpg"
+               srcset="assets/work-md-couple-500.jpg 500w, assets/work-md-couple-800.jpg 800w, assets/work-md-couple-1400.jpg 1400w"
+               sizes="(min-width:1024px) 28vw, (min-width:640px) 46vw, 100vw"
+               alt="A couple dressed for a matric dance indoors, holding a bouquet of roses"
+               width="800" height="1200" loading="lazy" decoding="async"
+               class="px-full absolute inset-0 w-full h-full object-cover">
+          <span class="absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/10 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300"></span>
+          <span class="absolute left-6 bottom-6 z-[3] text-left translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 transition duration-300">
+            <span class="block label text-brandText">Events</span>
+            <span class="block font-display text-2xl mt-1.5">Matric dance</span>
+          </span>
+        </button>
+      </figure>
+      <figure class="tile sm:col-span-2" data-cat="portraits">
+        <button type="button" class="lightbox-trigger group frame relative block w-full aspect-[4/3] cursor-pointer"
+                data-src="assets/work-bw-pair-2000.jpg"
+                data-caption="Quiet frame">
+          <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAAPABYDASIAAhEBAxEB/8QAFwABAQEBAAAAAAAAAAAAAAAAAAUCA//EACIQAAEEAgEEAwAAAAAAAAAAAAEAAgMRBCESBRMiQTNhkf/EABQBAQAAAAAAAAAAAAAAAAAAAAD/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCBiMyMqY/I9otziPWkdH2cmTlE8CvHkKKq9MlMOC0Xt1j9tc+okSPDu5xJBN0TpBFmaWu22r9ItzEk7dy+0Qf/2Q==)"></span>
+          <img src="assets/work-bw-pair-1200.jpg"
+               srcset="assets/work-bw-pair-800.jpg 800w, assets/work-bw-pair-1200.jpg 1200w, assets/work-bw-pair-2000.jpg 2000w"
+               sizes="(min-width:1024px) 56vw, (min-width:640px) 92vw, 100vw"
+               alt="Black and white portrait of a couple standing close, hands clasped"
+               width="1200" height="800" loading="lazy" decoding="async"
+               class="px-full absolute inset-0 w-full h-full object-cover">
+          <span class="absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/10 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300"></span>
+          <span class="absolute left-6 bottom-6 z-[3] text-left translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 transition duration-300">
+            <span class="block label text-brandText">Portraits</span>
+            <span class="block font-display text-2xl mt-1.5">Quiet frame</span>
+          </span>
+        </button>
+      </figure>
+      <figure class="tile" data-cat="portraits">
+        <button type="button" class="lightbox-trigger group frame relative block w-full aspect-[3/4] cursor-pointer"
+                data-src="assets/work-couple-walk-1400.jpg"
+                data-caption="Evening walk">
+          <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAAiABYDASIAAhEBAxEB/8QAGgAAAgMBAQAAAAAAAAAAAAAAAAUCAwQBBv/EACIQAAIBAwQDAQEAAAAAAAAAAAECAAMEEQUSITEiQWGR8f/EABcBAAMBAAAAAAAAAAAAAAAAAAABAwL/xAAaEQEAAwADAAAAAAAAAAAAAAAAAREyAkFR/9oADAMBAAIRAxEAPwBsooINzZ7xJ3lYW1EOykLnE8omoVyNhclc5xGIvLvUbU0Uw6IeyMHqYuZDPc6rXp3LlamAetpyIRZcK9I7KgII9GEzRJrQ5baSFA9Rjo5ItKoU58ju/P7Fy3avTdaIwGHII6PyXaZUYW7ouR5Ak/spxyfay5VatwQGXIHOSBCLq1Gs1RvH2ecwk6j0W03QC0DtGOfU7QVcJ4jn5CEcZJbgbjwIQhJB/9k=)"></span>
+          <img src="assets/work-couple-walk-800.jpg"
+               srcset="assets/work-couple-walk-500.jpg 500w, assets/work-couple-walk-800.jpg 800w, assets/work-couple-walk-1400.jpg 1400w"
+               sizes="(min-width:1024px) 28vw, (min-width:640px) 46vw, 100vw"
+               alt="A couple walking through a garden at dusk, the bride in a navy beaded gown"
+               width="800" height="1241" loading="lazy" decoding="async"
+               class="px-full absolute inset-0 w-full h-full object-cover">
+          <span class="absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/10 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300"></span>
+          <span class="absolute left-6 bottom-6 z-[3] text-left translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 transition duration-300">
+            <span class="block label text-brandText">Portraits</span>
+            <span class="block font-display text-2xl mt-1.5">Evening walk</span>
+          </span>
+        </button>
+      </figure>
+      <figure class="tile" data-cat="events">
+        <button type="button" class="lightbox-trigger group frame relative block w-full aspect-[3/4] cursor-pointer"
+                data-src="assets/work-proposal-room-1400.jpg"
+                data-caption="The setup">
+          <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAAhABYDASIAAhEBAxEB/8QAGgAAAgMBAQAAAAAAAAAAAAAAAAUCBAcBBv/EACcQAAICAQIFAwUAAAAAAAAAAAECAAMRBDEFEiFBwRUi0TJRUmGx/8QAGQEAAgMBAAAAAAAAAAAAAAAAAQQAAwUC/8QAHBEAAgICAwAAAAAAAAAAAAAAAAECEQMxBBJB/9oADAMBAAIRAxEAPwBNquA6/RAM1JdDsU6yh9JwEOftiag+OajH5eDFqajSNqKjWlZdrmVmwMjHN8SBs8PVwviOqBNOksIHflx/YTRluRXt75bwIQ0CxCOJ3llKlARtuQOnaL6Vv0y14tDFLTZ1/YI8yhVqeUb9ZNtXkbxdzfhq4uHDrc9jL1hlJ9qHJz7gfmEQ32EtkQlqlaEJ4XGTVERtOwhFzXWiDQhCdIpls//Z)"></span>
+          <img src="assets/work-proposal-room-800.jpg"
+               srcset="assets/work-proposal-room-500.jpg 500w, assets/work-proposal-room-800.jpg 800w, assets/work-proposal-room-1400.jpg 1400w"
+               sizes="(min-width:1024px) 28vw, (min-width:640px) 46vw, 100vw"
+               alt="A proposal set up on a red carpet with lanterns in a room with floor to ceiling windows"
+               width="800" height="1200" loading="lazy" decoding="async"
+               class="px-full absolute inset-0 w-full h-full object-cover">
+          <span class="absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/10 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300"></span>
+          <span class="absolute left-6 bottom-6 z-[3] text-left translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 transition duration-300">
+            <span class="block label text-brandText">Events</span>
+            <span class="block font-display text-2xl mt-1.5">The setup</span>
+          </span>
+        </button>
+      </figure>
+      <figure class="tile sm:col-span-2" data-cat="portraits">
+        <button type="button" class="lightbox-trigger group frame relative block w-full aspect-[4/3] cursor-pointer"
+                data-src="assets/work-grad-columns-2000.jpg"
+                data-caption="Graduation portrait">
+          <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAAPABYDASIAAhEBAxEB/8QAGAAAAwEBAAAAAAAAAAAAAAAAAAMEBQb/xAAfEAACAgIDAAMAAAAAAAAAAAABAgMRAAUEITEGQXH/xAAVAQEBAAAAAAAAAAAAAAAAAAABAv/EABkRAAMAAwAAAAAAAAAAAAAAAAABEQIiMf/aAAwDAQACEQMRAD8Am504jCoyl7J6BrLtVsk5GvmgFiVKPvozM2rkEiPw3f5ifjwQ89gwYloz59eZKWtKy6dJESuvj6u3OGM4AjliaAuUKMTRW+jhhBp//9k=)"></span>
+          <img src="assets/work-grad-columns-1200.jpg"
+               srcset="assets/work-grad-columns-800.jpg 800w, assets/work-grad-columns-1200.jpg 1200w, assets/work-grad-columns-2000.jpg 2000w"
+               sizes="(min-width:1024px) 56vw, (min-width:640px) 92vw, 100vw"
+               alt="A graduate in cap and gown leaning against the stone columns of a university building"
+               width="1200" height="800" loading="lazy" decoding="async"
+               class="px-full absolute inset-0 w-full h-full object-cover">
+          <span class="absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/10 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300"></span>
+          <span class="absolute left-6 bottom-6 z-[3] text-left translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 transition duration-300">
+            <span class="block label text-brandText">Portraits</span>
+            <span class="block font-display text-2xl mt-1.5">Graduation portrait</span>
+          </span>
+        </button>
+      </figure>
+      <figure class="tile sm:col-span-2" data-cat="events">
+        <button type="button" class="lightbox-trigger group frame relative block w-full aspect-[4/3] cursor-pointer"
+                data-src="assets/work-prep-2000.jpg"
+                data-caption="Getting ready">
+          <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAAPABYDASIAAhEBAxEB/8QAFwAAAwEAAAAAAAAAAAAAAAAAAAQFBv/EACIQAAICAQMEAwAAAAAAAAAAAAECAAMEBSExERIiQRRxof/EABYBAQEBAAAAAAAAAAAAAAAAAAMBAv/EABkRAQACAwAAAAAAAAAAAAAAAAABIRMxQf/aAAwDAQACEQMRAD8AiYOU9t3YQpBXrt6l3Rcs4tl6qB5vyfoROvEpV+6tRWTtsOY9p9bVfIRunk4/AIfaLF7aJWFtasQN/UJGbJNXBIEJpMb/2Q==)"></span>
+          <img src="assets/work-prep-1200.jpg"
+               srcset="assets/work-prep-800.jpg 800w, assets/work-prep-1200.jpg 1200w, assets/work-prep-2000.jpg 2000w"
+               sizes="(min-width:1024px) 56vw, (min-width:640px) 92vw, 100vw"
+               alt="A bride in a blush hijab having her hair and makeup finished before the ceremony"
+               width="1200" height="800" loading="lazy" decoding="async"
+               class="px-full absolute inset-0 w-full h-full object-cover">
+          <span class="absolute inset-0 z-[2] bg-gradient-to-t from-ink/90 via-ink/10 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300"></span>
+          <span class="absolute left-6 bottom-6 z-[3] text-left translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100 transition duration-300">
+            <span class="block label text-brandText">Events</span>
+            <span class="block font-display text-2xl mt-1.5">Getting ready</span>
+          </span>
+        </button>
+      </figure>
+    </div>
+
+    <p id="emptyState" class="hidden mt-14 text-center text-white/60 font-light">No work in this category yet.</p>
+
+    <div class="mt-14 reveal">
+      <a href="https://www.instagram.com/pixel.8_/" target="_blank" rel="noopener noreferrer"
+         class="label inline-flex items-center gap-3 text-white/70 hover:text-white transition-colors duration-200 cursor-pointer">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+        </svg>
+        More on Instagram
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ SERVICES -->
+<section id="services" class="relative bg-ink2 border-t border-white/10 py-24 md:py-36">
+  <div class="mx-auto max-w-site px-5 sm:px-8 lg:px-12">
+
+    <div class="reveal">
+      <h2 class="split font-display display-tight text-[clamp(1.875rem,3.8vw,3rem)] max-w-[16ch]">
+        Three things, done properly.
+      </h2>
+    </div>
+
+    <div class="mt-16 md:mt-20 grid lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+
+      <!-- Feature image -->
+      <div class="lg:col-span-5 reveal">
+        <div class="frame relative aspect-[3/4] w-full">
+          <span class="px-grid" aria-hidden="true" style="background-image:url(data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABMNDhEODBMRDxEVFBMXHTAfHRoaHToqLCMwRT1JR0Q9Q0FMVm1dTFFoUkFDX4JgaHF1e3x7SlyGkIV3j214e3b/2wBDARQVFR0ZHTgfHzh2T0NPdnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnZ2dnb/wAARCAAhABYDASIAAhEBAxEB/8QAGAABAQEBAQAAAAAAAAAAAAAAAAQFAQP/xAApEAACAQMDAgQHAAAAAAAAAAABAgMABBESITEFExRBgaEGFTJRcZGx/8QAFwEAAwEAAAAAAAAAAAAAAAAAAAEDAv/EAB4RAAIBAwUAAAAAAAAAAAAAAAABAgMEERITITFR/9oADAMBAAIRAxEAPwDYRo5PoYN+K83nhWPXqyucetYUvVLcQMlurrLnZjyPeqFY3MUsmSsCkaQ25J8z61WVaSXKwTjSi+maUV3BKSA2MfelZcb2m7EyE/qlRV3JD2V6UfEBWFHktltBEmN1ALE1HazCzsIpwue5qydsAnIH8qifpVzNbeGUW8UTNqYpqJ9658mn8EtsJFxrLEk8bYrTeSiWDQtrO1eBH7XKg7k0rnTLOWyh7TyiRORtuKVPSgK/Oi8UpWgO0pSkB//Z)"></span>
+          <img src="assets/shoot-tall-800.jpg"
+               srcset="assets/shoot-tall-500.jpg 500w, assets/shoot-tall-800.jpg 800w, assets/shoot-tall-1400.jpg 1400w"
+               sizes="(min-width:1024px) 40vw, 100vw"
+               alt="Full-length portrait of a couple dressed for a matric dance beside a sports car"
+               width="800" height="1200" loading="lazy" decoding="async"
+               class="px-full absolute inset-0 w-full h-full object-cover">
+        </div>
+        <p class="mt-5 label text-white/55">Matric farewell &middot; 2025</p>
+      </div>
+
+      <!-- Service list -->
+      <div class="lg:col-span-7 divide-y divide-white/10 border-t border-white/10">
+
+        <article class="svc py-9 md:py-11 group reveal">
+          <div>
+            <h3 class="font-display text-3xl md:text-4xl">Events &amp; Celebrations</h3>
+          </div>
+          <p class="mt-5 text-white/65 font-light leading-relaxed max-w-[54ch]">
+            Matric dances, weddings, birthdays and corporate functions. We cover the whole arc of the day &mdash; the preparation, the arrivals, the speeches and the part everyone remembers at 1&nbsp;a.m.
+          </p>
+          <ul class="mt-6 flex flex-wrap gap-x-6 gap-y-2 label text-white/55">
+            <li>Full-day coverage</li><li>Second shooter</li><li>Same-week previews</li>
+          </ul>
+        </article>
+
+        <article class="svc py-9 md:py-11 group reveal">
+          <div>
+            <h3 class="font-display text-3xl md:text-4xl">Commercial &amp; Product</h3>
+          </div>
+          <p class="mt-5 text-white/65 font-light leading-relaxed max-w-[54ch]">
+            Catalogue and campaign imagery for brands, storefronts and menus. Controlled lighting, consistent framing across a range, and files cut to the sizes your site and print supplier actually need.
+          </p>
+          <ul class="mt-6 flex flex-wrap gap-x-6 gap-y-2 label text-white/55">
+            <li>Studio or on-site</li><li>Consistent range framing</li><li>Web &amp; print exports</li>
+          </ul>
+        </article>
+
+        <article class="svc py-9 md:py-11 group reveal">
+          <div>
+            <h3 class="font-display text-3xl md:text-4xl">Portraits &amp; Shoots</h3>
+          </div>
+          <p class="mt-5 text-white/65 font-light leading-relaxed max-w-[54ch]">
+            Matric farewell, couples, family and professional headshots. Directed properly, so you don&rsquo;t have to know what to do with your hands &mdash; and lit so the result still looks like you.
+          </p>
+          <ul class="mt-6 flex flex-wrap gap-x-6 gap-y-2 label text-white/55">
+            <li>Location scouting</li><li>Wardrobe guidance</li><li>Retouched selects</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ STORY -->
+<!-- Copy sourced from pixel8media.co.za/about. NOTE: "eight years" and the
+     counters below are relative figures taken from that page — bump them when
+     the anniversary rolls over. -->
+<section id="story" class="relative py-24 md:py-36">
+  <div class="mx-auto max-w-site px-5 sm:px-8 lg:px-12">
+
+    <div class="reveal">
+      <p class="label text-brandText">Our story</p>
+      <h2 class="split font-display display-tight text-[clamp(2rem,4.4vw,3.5rem)] mt-5 max-w-[16ch]">
+        The people behind the pixels.
+      </h2>
+    </div>
+
+    <div class="mt-16 md:mt-20 grid lg:grid-cols-12 gap-14 lg:gap-16">
+
+      <!-- Narrative -->
+      <div class="lg:col-span-7">
+        <p class="text-lg md:text-xl text-white/80 font-light leading-relaxed max-w-[54ch] reveal">
+          What started eight years ago with founder <span class="text-white">Rayhaan Cassim</span> has grown into a full-service creative studio &mdash; now co-led by his business partner of fifteen years, <span class="text-white">Muhammad Chopdat</span>.
+        </p>
+
+        <p class="mt-7 text-white/60 font-light leading-relaxed max-w-[54ch] reveal">
+          Pixel8 is a Johannesburg studio working with businesses and individuals who understand that presentation matters. A luxury product, a corporate function, a personal portrait, a full brand identity &mdash; the brief changes, the standard doesn&rsquo;t.
+        </p>
+
+        <p class="mt-7 text-white/60 font-light leading-relaxed max-w-[54ch] reveal">
+          From the lead creatives to the editors working behind the scenes, the whole team is pointed at one thing: turning an abstract idea into clean, intentional, market-ready visuals.
+        </p>
+
+        <!-- The two names on the door -->
+        <div class="mt-12 border-t border-white/10 reveal">
+          <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-6 border-b border-white/10">
+            <span class="font-display text-2xl md:text-3xl">Rayhaan Cassim</span>
+            <span class="label text-white/55 shrink-0">Founder</span>
+          </div>
+          <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-6 border-b border-white/10">
+            <span class="font-display text-2xl md:text-3xl">Muhammad Chopdat</span>
+            <span class="label text-white/55 shrink-0">Partner &amp; co-lead</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Figures + the belief behind them -->
+      <aside class="lg:col-span-5 lg:pl-14 lg:border-l lg:border-white/10">
+        <div class="grid grid-cols-2 gap-8 reveal">
+          <div>
+            <p class="font-display display-tight text-[clamp(3.25rem,8vw,5rem)] text-brand tabular-nums">
+              <span class="count" data-to="8" data-pad="2">08</span>
+            </p>
+            <p class="label text-white/55 mt-3">Years shooting</p>
+          </div>
+          <div>
+            <p class="font-display display-tight text-[clamp(3.25rem,8vw,5rem)] tabular-nums">
+              <span class="count" data-to="15" data-pad="2">15</span>
+            </p>
+            <p class="label text-white/55 mt-3">Years in partnership</p>
+          </div>
+        </div>
+
+        <div class="rule mt-14"></div>
+
+        <blockquote class="mt-14 reveal">
+          <p class="font-display text-2xl md:text-[1.75rem] leading-snug text-white/85">
+            Strong visuals don&rsquo;t just look good &mdash; they build trust, raise perceived value, and help brands stand out in competitive markets.
+          </p>
+          <footer class="mt-7 label text-white/55">Pixel8 Media Solutions</footer>
+        </blockquote>
+
+        <ul class="mt-14 space-y-4 reveal">
+          <li class="flex items-start gap-4 text-white/60 font-light">
+            <svg class="w-4 h-4 mt-1.5 text-brand shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5.2 5.2L20 7"/></svg>
+            Detail-focused photography
+          </li>
+          <li class="flex items-start gap-4 text-white/60 font-light">
+            <svg class="w-4 h-4 mt-1.5 text-brand shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5.2 5.2L20 7"/></svg>
+            Modern, strategic design
+          </li>
+          <li class="flex items-start gap-4 text-white/60 font-light">
+            <svg class="w-4 h-4 mt-1.5 text-brand shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5.2 5.2L20 7"/></svg>
+            Visual consistency across platforms
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════ THE STANDARD (light) -->
+<section id="standard" class="bg-bone text-ink py-24 md:py-36">
+  <div class="mx-auto max-w-site px-5 sm:px-8 lg:px-12">
+
+    <div class="max-w-[52ch] reveal">
+      <h2 class="split font-display display-tight text-[clamp(2rem,4.4vw,3.5rem)] ">
+        Why the pictures come back better.
+      </h2>
+      <p class="mt-7 text-lg text-ink/65 font-light leading-relaxed">
+        Anyone can hold a camera at an event. The difference shows up two weeks later, when you open the gallery.
+      </p>
+    </div>
+
+    <div class="mt-16 md:mt-20 grid md:grid-cols-3 gap-px bg-ink/12 border border-ink/12">
+
+      <div class="bg-bone p-8 md:p-10 reveal">
+        <svg class="w-7 h-7 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.7a1 1 0 0 0 .83-.45l.94-1.4A1 1 0 0 1 9.8 3.7h4.4a1 1 0 0 1 .83.45l.94 1.4a1 1 0 0 0 .83.45h1.7A2.5 2.5 0 0 1 21 8.5v8A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5z"/><circle cx="12" cy="12.2" r="3.6"/>
+        </svg>
+        <h3 class="font-display text-2xl mt-6">Lit properly, whatever the room</h3>
+        <p class="mt-4 text-ink/65 font-light leading-relaxed">
+          Prime lenses, off-camera lighting and someone who reads a room before shooting it &mdash; so a dim reception hall and a harsh midday car park both come back clean, sharp and correctly exposed.
+        </p>
+      </div>
+
+      <div class="bg-bone p-8 md:p-10 reveal">
+        <svg class="w-7 h-7 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3l2.1 4.6 5 .6-3.7 3.4 1 4.9L12 14.1 7.6 16.5l1-4.9L4.9 8.2l5-.6z"/><path d="M18.5 17.5v4M16.5 19.5h4"/>
+        </svg>
+        <h3 class="font-display text-2xl mt-6">Editing by hand</h3>
+        <p class="mt-4 text-ink/65 font-light leading-relaxed">
+          No batch preset dumped over the set. Every delivered frame is graded individually for colour, skin tone and contrast, so the gallery holds together as one body of work.
+        </p>
+      </div>
+
+      <div class="bg-bone p-8 md:p-10 reveal">
+        <svg class="w-7 h-7 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.4 2"/>
+        </svg>
+        <h3 class="font-display text-2xl mt-6">Reliable on the day</h3>
+        <p class="mt-4 text-ink/65 font-light leading-relaxed">
+          We arrive early, we know the run sheet, and we carry backups of everything that matters. You get an agreed delivery date up front &mdash; and we hit it.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ PROCESS -->
+<section id="process" class="relative py-24 md:py-36">
+  <div class="mx-auto max-w-site px-5 sm:px-8 lg:px-12">
+
+    <div class="reveal">
+      <h2 class="split font-display display-tight text-[clamp(1.875rem,3.8vw,3rem)] max-w-[15ch]">
+        Four steps, no surprises.
+      </h2>
+    </div>
+
+    <ol class="mt-16 md:mt-20 grid sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+      <li class="reveal">
+        <div class="rule mb-7"></div>
+        <span class="label text-brandText">Step 01</span>
+        <h3 class="font-display text-2xl mt-3">Enquire</h3>
+        <p class="mt-3 text-white/60 font-light leading-relaxed">Tell us the date, the place and roughly what you need. You get a written quote &mdash; not a &ldquo;let&rsquo;s chat about budget&rdquo;.</p>
+      </li>
+      <li class="reveal">
+        <div class="rule mb-7"></div>
+        <span class="label text-brandText">Step 02</span>
+        <h3 class="font-display text-2xl mt-3">Plan</h3>
+        <p class="mt-3 text-white/60 font-light leading-relaxed">We agree the shot list, the timings and the locations before the day, so nothing important gets improvised.</p>
+      </li>
+      <li class="reveal">
+        <div class="rule mb-7"></div>
+        <span class="label text-brandText">Step 03</span>
+        <h3 class="font-display text-2xl mt-3">Shoot</h3>
+        <p class="mt-3 text-white/60 font-light leading-relaxed">We turn up early, set up out of the way, and direct where it helps. Previews reach you within the week.</p>
+      </li>
+      <li class="reveal">
+        <div class="rule mb-7"></div>
+        <span class="label text-brandText">Step 04</span>
+        <h3 class="font-display text-2xl mt-3">Deliver</h3>
+        <p class="mt-3 text-white/60 font-light leading-relaxed">A private online gallery with full-resolution downloads, plus web-sized copies. Print files on request.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════ TESTIMONIALS -->
+<!-- Real client feedback, supplied by Pixel8. Attribution is by role only —
+     no names were given, so none are invented. -->
+<section id="reviews" class="relative bg-ink2 border-y border-white/10 py-24 md:py-32" aria-label="Client feedback">
+  <div class="mx-auto max-w-site px-5 sm:px-8 lg:px-12">
+
+    <div class="reveal">
+      <h2 class="split font-display display-tight text-[clamp(1.875rem,3.8vw,3rem)] max-w-[15ch]">
+        What clients say after.
+      </h2>
+    </div>
+
+    <div class="mt-16 md:mt-20 grid md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+
+      <!-- ── Matric dances ───────────────────────────────────────────── -->
+      <figure class="reveal bg-ink border border-white/10 p-8 md:p-9">
+        <p class="label text-brandText">Matric dance</p>
+        <blockquote class="mt-5 font-display text-[1.0625rem] md:text-lg leading-relaxed text-white/85">
+          &ldquo;We booked Pixel8 for our daughter&rsquo;s matric dance and I&rsquo;m so glad we did. They arrived early, worked around the pre-drinks chaos at our house, and still got beautiful shots of the whole group before they left. The photos came back quicker than I expected.&rdquo;
+        </blockquote>
+        <figcaption class="mt-7 label text-white/55">Parent</figcaption>
+      </figure>
+
+      <figure class="reveal bg-ink border border-white/10 p-8 md:p-9">
+        <p class="label text-brandText">Matric dance</p>
+        <blockquote class="mt-5 font-display text-[1.0625rem] md:text-lg leading-relaxed text-white/85">
+          &ldquo;I hate having my photo taken and I was dreading the posed stuff. They made it feel relaxed instead of awkward, and honestly the candid ones of me and my friends are my favourites.&rdquo;
+        </blockquote>
+        <figcaption class="mt-7 label text-white/55">Matriculant</figcaption>
+      </figure>
+
+      <figure class="reveal bg-ink border border-white/10 p-8 md:p-9">
+        <p class="label text-brandText">Matric dance &middot; group booking</p>
+        <blockquote class="mt-5 font-display text-[1.0625rem] md:text-lg leading-relaxed text-white/85">
+          &ldquo;Six families, six sets of parents with opinions, one very tight schedule. Pixel8 handled it calmly and everyone got the photos they wanted. Worth every cent for that alone.&rdquo;
+        </blockquote>
+        <figcaption class="mt-7 label text-white/55">Parent</figcaption>
+      </figure>
+
+      <!-- ── Weddings ────────────────────────────────────────────────── -->
+      <figure class="reveal bg-ink border border-white/10 p-8 md:p-9">
+        <p class="label text-brandText">Wedding</p>
+        <blockquote class="mt-5 font-display text-[1.0625rem] md:text-lg leading-relaxed text-white/85">
+          &ldquo;They were there all day and I barely noticed them, which is exactly what I wanted. Then the gallery arrived and it was like watching the whole day again from the outside. All the small moments I missed.&rdquo;
+        </blockquote>
+        <figcaption class="mt-7 label text-white/55">Bride</figcaption>
+      </figure>
+
+      <figure class="reveal bg-ink border border-white/10 p-8 md:p-9">
+        <p class="label text-brandText">Wedding</p>
+        <blockquote class="mt-5 font-display text-[1.0625rem] md:text-lg leading-relaxed text-white/85">
+          &ldquo;Clear communication from the first email through to delivery. We knew what we were getting, when we&rsquo;d get it, and what it would cost. No surprises, which took a lot of stress off the planning.&rdquo;
+        </blockquote>
+        <figcaption class="mt-7 label text-white/55">Groom</figcaption>
+      </figure>
+
+      <figure class="reveal bg-ink border border-white/10 p-8 md:p-9">
+        <p class="label text-brandText">Wedding</p>
+        <blockquote class="mt-5 font-display text-[1.0625rem] md:text-lg leading-relaxed text-white/85">
+          &ldquo;It rained. Properly rained, twenty minutes before our outdoor shoot. They had a plan ready, moved us undercover, and those photos ended up being the ones we printed for the lounge.&rdquo;
+        </blockquote>
+        <figcaption class="mt-7 label text-white/55">Couple</figcaption>
+      </figure>
+
+      <figure class="reveal bg-ink border border-white/10 p-8 md:p-9">
+        <p class="label text-brandText">Wedding</p>
+        <blockquote class="mt-5 font-display text-[1.0625rem] md:text-lg leading-relaxed text-white/85">
+          &ldquo;My gran is 89 and getting her into the family photos was my one non-negotiable. They made time for it without me having to chase, and that portrait means more to me than anything else from the day.&rdquo;
+        </blockquote>
+        <figcaption class="mt-7 label text-white/55">Bride</figcaption>
+      </figure>
+
+      <!-- ── Graduations ─────────────────────────────────────────────── -->
+      <figure class="reveal bg-ink border border-white/10 p-8 md:p-9">
+        <p class="label text-brandText">Graduation</p>
+        <blockquote class="mt-5 font-display text-[1.0625rem] md:text-lg leading-relaxed text-white/85">
+          &ldquo;First person in my family to graduate, so these photos matter to us in a big way. They took the time to get proper shots with my mom and my sisters, not just the standard cap-and-gown pose.&rdquo;
+        </blockquote>
+        <figcaption class="mt-7 label text-white/55">Graduate</figcaption>
+      </figure>
+
+      <figure class="reveal bg-ink border border-white/10 p-8 md:p-9">
+        <p class="label text-brandText">Graduation</p>
+        <blockquote class="mt-5 font-display text-[1.0625rem] md:text-lg leading-relaxed text-white/85">
+          &ldquo;Campus was packed and the light was terrible by the time our ceremony finished. They found a spot, worked fast, and the results don&rsquo;t look rushed at all.&rdquo;
+        </blockquote>
+        <figcaption class="mt-7 label text-white/55">Parent</figcaption>
+      </figure>
+
+      <!-- ── Other events ────────────────────────────────────────────── -->
+      <figure class="reveal bg-ink border border-white/10 p-8 md:p-9">
+        <p class="label text-brandText">21st &middot; family celebration</p>
+        <blockquote class="mt-5 font-display text-[1.0625rem] md:text-lg leading-relaxed text-white/85">
+          &ldquo;We used Pixel8 for my son&rsquo;s 21st and the album has become a bit of a family thing now, people page through it every time they visit. Easy to work with, fair pricing, no drama on the night.&rdquo;
+        </blockquote>
+        <figcaption class="mt-7 label text-white/55">Parent</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ CONTACT -->
+<section id="contact" class="relative py-24 md:py-36">
+  <div class="mx-auto max-w-site px-5 sm:px-8 lg:px-12">
+
+    <div class="grid lg:grid-cols-12 gap-14 lg:gap-20">
+
+      <div class="lg:col-span-5">
+        <div class="reveal">
+              <h2 class="split font-display display-tight text-[clamp(2.25rem,5.5vw,4.5rem)] max-w-[12ch]">
+            Ready to frame your moment?
+          </h2>
+          <p class="mt-7 text-white/65 font-light leading-relaxed max-w-[42ch]">
+            Send through the date and what you have in mind. We reply to every enquiry within one working day.
+          </p>
+        </div>
+
+        <dl class="mt-12 space-y-7 reveal">
+          <div>
+            <dt class="label text-white/55">Email</dt>
+            <dd class="mt-2">
+              <a href="mailto:pixel8.za@gmail.com" class="text-xl font-light hover:text-brand transition-colors duration-200 cursor-pointer">pixel8.za@gmail.com</a>
+            </dd>
+          </div>
+          <div>
+            <dt class="label text-white/55">Phone &amp; WhatsApp</dt>
+            <dd class="mt-2">
+              <a href="tel:+27730154475" class="text-xl font-light hover:text-brand transition-colors duration-200 cursor-pointer">+27&nbsp;73&nbsp;015&nbsp;4475</a>
+            </dd>
+          </div>
+          <div>
+            <dt class="label text-white/55">Instagram</dt>
+            <dd class="mt-2">
+              <a href="https://www.instagram.com/pixel.8_/" target="_blank" rel="noopener noreferrer" class="text-xl font-light hover:text-brand transition-colors duration-200 cursor-pointer">@pixel.8_</a>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- Enquiry form -->
+      <div class="lg:col-span-7 reveal">
+        <form id="enquiry" class="border border-white/12 p-7 md:p-10 space-y-7" novalidate>
+
+          <div class="grid sm:grid-cols-2 gap-7">
+            <div>
+              <label for="name" class="label text-white/60 block">Your name</label>
+              <input id="name" name="name" type="text" autocomplete="name" required
+                     class="mt-3 w-full bg-transparent border-b border-white/20 py-3 text-base focus:border-brand focus:outline-none transition-colors duration-200 placeholder:text-white/50"
+                     placeholder="Jane Dlamini">
+              <p class="err hidden mt-2 text-sm text-brandLift" data-for="name"></p>
+            </div>
+            <div>
+              <label for="email" class="label text-white/60 block">Email</label>
+              <input id="email" name="email" type="email" autocomplete="email" required
+                     class="mt-3 w-full bg-transparent border-b border-white/20 py-3 text-base focus:border-brand focus:outline-none transition-colors duration-200 placeholder:text-white/50"
+                     placeholder="jane@example.co.za">
+              <p class="err hidden mt-2 text-sm text-brandLift" data-for="email"></p>
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-7">
+            <div>
+              <label for="type" class="label text-white/60 block">Shoot type</label>
+              <select id="type" name="type"
+                      class="mt-3 w-full bg-transparent border-b border-white/20 py-3 text-base focus:border-brand focus:outline-none transition-colors duration-200 cursor-pointer">
+                <option class="bg-ink" value="Events &amp; Celebrations">Events &amp; Celebrations</option>
+                <option class="bg-ink" value="Commercial &amp; Product">Commercial &amp; Product</option>
+                <option class="bg-ink" value="Portraits &amp; Shoots">Portraits &amp; Shoots</option>
+                <option class="bg-ink" value="Not sure yet">Not sure yet</option>
+              </select>
+            </div>
+            <div>
+              <label for="date" class="label text-white/60 block">Date <span class="normal-case tracking-normal text-white/50">(if known)</span></label>
+              <input id="date" name="date" type="date"
+                     class="mt-3 w-full bg-transparent border-b border-white/20 py-3 text-base focus:border-brand focus:outline-none transition-colors duration-200 cursor-pointer [color-scheme:dark]">
+            </div>
+          </div>
+
+          <div>
+            <label for="message" class="label text-white/60 block">Tell us about the shoot</label>
+            <textarea id="message" name="message" rows="4" required
+                      class="mt-3 w-full bg-transparent border-b border-white/20 py-3 text-base focus:border-brand focus:outline-none transition-colors duration-200 resize-y placeholder:text-white/50"
+                      placeholder="Venue, rough timings, how many people, anything you already know you want."></textarea>
+            <p class="err hidden mt-2 text-sm text-brandLift" data-for="message"></p>
+          </div>
+
+          <button type="submit" id="submitBtn"
+                  class="btn-arrow label inline-flex items-center gap-3 bg-brand hover:bg-brandLift text-white px-8 py-4 transition-colors duration-200 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+            <span id="submitText">Send enquiry</span>
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+
+          <p id="formNote" class="text-sm text-white/55 font-light" role="status" aria-live="polite">
+            This opens your email app with the message ready to send.
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════ FOOTER -->
+<footer class="border-t border-white/10 bg-ink2">
+  <div class="mx-auto max-w-site px-5 sm:px-8 lg:px-12 py-14">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-10">
+
+      <div>
+        <img src="assets/pixel8-logo-full-white.png" alt="Pixel8 Media Solutions" width="400" height="400" class="h-16 w-auto object-contain" loading="lazy">
+        <p class="mt-5 text-white/60 font-light max-w-[36ch]">Photography &amp; design. Events, commercial and portrait work across South Africa.</p>
+      </div>
+
+      <nav class="flex flex-wrap gap-x-8 gap-y-3" aria-label="Footer">
+        <a href="#work"     class="label text-white/50 hover:text-white transition-colors duration-200 cursor-pointer">Work</a>
+        <a href="#services" class="label text-white/50 hover:text-white transition-colors duration-200 cursor-pointer">Services</a>
+        <a href="#story"    class="label text-white/50 hover:text-white transition-colors duration-200 cursor-pointer">Story</a>
+        <a href="#standard" class="label text-white/50 hover:text-white transition-colors duration-200 cursor-pointer">Standard</a>
+        <a href="#process"  class="label text-white/50 hover:text-white transition-colors duration-200 cursor-pointer">Process</a>
+        <a href="#contact"  class="label text-white/50 hover:text-white transition-colors duration-200 cursor-pointer">Contact</a>
+      </nav>
+    </div>
+
+    <div class="rule mt-12 mb-7"></div>
+
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <p class="text-sm text-white/55 font-light">&copy; <span id="year">2026</span> Pixel8 Media Solutions. All rights reserved.</p>
+      <div class="flex items-center gap-6">
+        <a href="https://www.instagram.com/pixel.8_/" target="_blank" rel="noopener noreferrer" class="text-white/60 hover:text-white transition-colors duration-200 cursor-pointer" aria-label="Pixel8 on Instagram">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+          </svg>
+        </a>
+        <a href="mailto:pixel8.za@gmail.com" class="text-white/60 hover:text-white transition-colors duration-200 cursor-pointer" aria-label="Email Pixel8">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6 8.5-6"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════ LIGHTBOX (z-50) -->
+<div id="lightbox" class="fixed inset-0 z-50 bg-ink/97 hidden items-center justify-center p-4 sm:p-8" role="dialog" aria-modal="true" aria-label="Enlarged photograph">
+  <button id="lbClose" type="button" class="absolute top-5 right-5 w-11 h-11 inline-flex items-center justify-center text-white/70 hover:text-white transition-colors duration-200 cursor-pointer">
+    <span class="sr-only">Close</span>
+    <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+  <figure class="max-w-[92vw] max-h-[88vh] flex flex-col items-center gap-5">
+    <img id="lbImg" src="" alt="" class="max-w-full max-h-[78vh] w-auto h-auto object-contain">
+    <figcaption id="lbCap" class="label text-white/50 text-center"></figcaption>
+  </figure>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- Footer year --------------------------------------------------- */
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  /* ---- One scroll listener drives nav, progress bar and parallax ------- */
+  var nav = document.getElementById('nav');
+  var progress = document.getElementById('progress');
+  var heroMedia = document.getElementById('heroMedia');
+  var heroCopy = document.getElementById('heroCopy');
+  var hero = document.getElementById('top');
+  var ticking = false;
+  var heroLive = null;
+
+  function render() {
+    ticking = false;
+    var y = window.scrollY || window.pageYOffset;
+
+    settle();
+
+    /* Nav solidifies once the hero is behind us */
+    nav.classList.toggle('nav-solid', y > 40);
+
+    if (reduced) return;
+
+    /* Progress bar */
+    var scrollable = document.documentElement.scrollHeight - window.innerHeight;
+    progress.style.transform = 'scaleX(' + (scrollable > 0 ? Math.min(y / scrollable, 1) : 0) + ')';
+
+    /* Hero parallax — the 1.25 scale leaves 12.5% of headroom either side,
+       so a 0.12 drift factor can never expose an edge. Both layers stop
+       being touched (and give up their compositing hint) once the hero is
+       behind us, so the rest of the page scrolls without them. */
+    var h = hero.offsetHeight;
+    var live = y < h;
+
+    if (live !== heroLive) {
+      heroLive = live;
+      hero.classList.toggle('hero-live', live);
+    }
+
+    if (live) {
+      heroMedia.style.transform = 'translate3d(0,' + (y * 0.12).toFixed(2) + 'px,0) scale(1.25)';
+      heroCopy.style.transform = 'translate3d(0,' + (y * 0.16).toFixed(2) + 'px,0)';
+      heroCopy.style.opacity = String(Math.max(1 - (y / h) * 1.6, 0));
+    }
+  }
+
+  function onScroll() {
+    if (!ticking) { ticking = true; window.requestAnimationFrame(render); }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  /* render() is kicked off at the end of setup, once `pending` exists */
+
+  /* ---- Split headings into masked words -------------------------------- */
+  /* Only plain-text headings are split, so any inner markup is left alone.
+     Splitting on a literal space keeps &nbsp;-joined pairs together. */
+  Array.prototype.forEach.call(document.querySelectorAll('.split'), function (el) {
+    if (el.children.length) return;
+
+    var text = el.textContent.trim().replace(/\s+/g, ' ');
+    var words = text.split(' ').filter(Boolean);
+
+    /* The per-word spans are decorative. Assistive tech reads the intact
+       sentence off aria-label instead of the chopped-up pieces. */
+    el.setAttribute('aria-label', text);
+
+    var holder = document.createElement('span');
+    holder.setAttribute('aria-hidden', 'true');
+
+    words.forEach(function (word, i) {
+      var mask = document.createElement('span');
+      mask.className = 'w';
+      var inner = document.createElement('span');
+      inner.className = 'wi';
+      inner.textContent = word;
+      inner.style.setProperty('--d', (i * 65) + 'ms');
+      mask.appendChild(inner);
+      holder.appendChild(mask);
+      if (i < words.length - 1) holder.appendChild(document.createTextNode(' '));
+    });
+
+    el.textContent = '';
+    el.appendChild(holder);
+  });
+
+  /* ---- Count-up for the studio figures ---------------------------------- */
+  function padded(value, width) {
+    var s = String(value);
+    var w = parseInt(width || '0', 10);
+    while (s.length < w) s = '0' + s;
+    return s;
+  }
+
+  function countUp(el) {
+    var to = parseInt(el.dataset.to, 10);
+    var pad = el.dataset.pad;
+    var start = null;
+    var DURATION = 1500;
+
+    function frame(now) {
+      if (start === null) start = now;
+      var t = Math.min((now - start) / DURATION, 1);
+      var eased = 1 - Math.pow(2, -10 * t);           /* easeOutExpo */
+      var v = Math.round(to * (t === 1 ? 1 : eased));
+      el.textContent = padded(v, pad);
+      if (t < 1) window.requestAnimationFrame(frame);
+    }
+    window.requestAnimationFrame(frame);
+  }
+
+  /* ---- Mobile menu ---------------------------------------------------- */
+  var menu = document.getElementById('mobileMenu');
+  var menuBtn = document.getElementById('menuBtn');
+  var menuClose = document.getElementById('menuClose');
+
+  function openMenu() {
+    menu.classList.remove('hidden');
+    menuBtn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+    menuClose.focus();
+  }
+  function closeMenu() {
+    menu.classList.add('hidden');
+    menuBtn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+    menuBtn.focus();
+  }
+  menuBtn.addEventListener('click', openMenu);
+  menuClose.addEventListener('click', closeMenu);
+  Array.prototype.forEach.call(document.querySelectorAll('.menu-link'), function (a) {
+    a.addEventListener('click', closeMenu);
+  });
+
+  /* ---- Entrance animation ----------------------------------------------- */
+  /* Blocks fade up, headings unmask word by word, hairlines draw, figures
+     count, and work tiles cascade.
+
+     This is driven by a viewport test on the existing scroll frame rather
+     than by IntersectionObserver. The elements start at opacity 0, so the
+     one unacceptable outcome is an element that never gets played — and an
+     observer can be dodged by an anchor jump, a very fast scroll, or a tile
+     that was display:none while the observer was looking at it. Re-testing
+     each unplayed element every frame is cheap (the list only shrinks) and
+     it cannot strand content off-screen. */
+
+  var pending = Array.prototype.slice.call(
+    document.querySelectorAll('.reveal, .split, .rule, .count, #grid .tile')
+  );
+
+  /* Tiles carry their start state from JS so a no-JS visitor still sees them */
+  if (!reduced) {
+    Array.prototype.forEach.call(document.querySelectorAll('#grid .tile'), function (t) {
+      t.classList.add('tile-pending');
+    });
+  }
+
+  function apply(el) {
+    if (el.classList.contains('reveal')) el.classList.add('reveal-in');
+    if (el.classList.contains('split')) el.classList.add('split-in');
+    if (el.classList.contains('rule')) el.classList.add('rule-in');
+    if (el.classList.contains('tile')) {
+      el.classList.remove('tile-pending');
+      el.classList.add('tile-in');
+    }
+    if (el.classList.contains('count')) {
+      if (reduced) el.textContent = padded(el.dataset.to, el.dataset.pad);
+      else countUp(el);
+    }
+  }
+
+  function playNow(el, delay) {
+    if (el.dataset.played) return;
+    el.dataset.played = '1';
+    if (delay) setTimeout(function () { apply(el); }, delay);
+    else apply(el);
+  }
+
+  /* Plays anything whose top edge has crossed the trigger line at 92% of the
+     viewport. Note there is no lower bound: an element the visitor has
+     already scrolled clean past still counts as played, so a fast scroll or
+     an anchor jump can never leave a block sitting at opacity 0.
+     Called every scroll frame, on resize, and after a filter. */
+  function settle() {
+    var line = window.innerHeight * 0.92;
+    var step = 0;
+    var still = [];
+
+    /* Forward order, so the cascade runs down the page */
+    for (var i = 0; i < pending.length; i++) {
+      var el = pending[i];
+      var r = el.getBoundingClientRect();
+
+      /* A display:none element has no box — leave it for a later pass */
+      if ((!r.width && !r.height) || r.top >= line) {
+        still.push(el);
+        continue;
+      }
+
+      /* Stagger within a batch, but cap it: a big batch must never leave
+         the last element invisible for seconds. */
+      playNow(el, reduced ? 0 : Math.min(step, 6) * 80);
+      step++;
+    }
+
+    pending = still;
+  }
+
+  window.addEventListener('load', settle);
+
+  /* Browsers suspend requestAnimationFrame in a background tab, so a page
+     opened in one (middle-click, "open in new tab") never reaches render().
+     Settle directly when it comes to the front, and clear the rAF latch so
+     the next scroll is not swallowed. */
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState !== 'visible') return;
+    ticking = false;
+    settle();
+  });
+
+  /* The hero is above the fold, so it resolves on load rather than on scroll */
+  if (!reduced) {
+    window.requestAnimationFrame(function () { heroMedia.classList.add('resolve-in'); });
+  }
+
+  /* Everything is defined now — paint the first frame */
+  render();
+
+  /* ---- Work filters ---------------------------------------------------- */
+  var filters = document.querySelectorAll('.filter');
+  var tiles = document.querySelectorAll('#grid .tile');
+  var emptyState = document.getElementById('emptyState');
+  var onClasses = ['bg-white', 'text-ink', 'border-white'];
+  var offClasses = ['border-white/20', 'text-white/65', 'hover:border-white', 'hover:text-white'];
+  var filterToken = 0;
+
+  Array.prototype.forEach.call(filters, function (btn) {
+    btn.addEventListener('click', function () {
+      var want = btn.dataset.filter;
+
+      Array.prototype.forEach.call(filters, function (b) {
+        var active = b === btn;
+        b.setAttribute('aria-pressed', String(active));
+        onClasses.forEach(function (c) { b.classList.toggle(c, active); });
+        offClasses.forEach(function (c) { b.classList.toggle(c, !active); });
+      });
+
+      /* Fade the outgoing tiles before pulling them from the layout, then
+         fade the incoming ones in. `token` cancels a pending swap if the
+         visitor clicks another filter mid-transition. */
+      filterToken++;
+      var token = filterToken;
+      var shown = 0;
+
+      Array.prototype.forEach.call(tiles, function (tile) {
+        var match = want === 'all' || tile.dataset.cat === want;
+        if (match) shown++;
+
+        if (reduced) {
+          tile.classList.toggle('hidden', !match);
+          return;
+        }
+
+        if (match) {
+          if (tile.classList.contains('hidden')) {
+            tile.classList.add('tile-hidden');
+            tile.classList.remove('hidden');
+            void tile.offsetWidth;                    /* commit the start state */
+          }
+          tile.classList.remove('tile-hidden');
+        } else if (!tile.classList.contains('hidden')) {
+          tile.classList.add('tile-hidden');
+          setTimeout(function () {
+            if (token === filterToken) tile.classList.add('hidden');
+          }, 280);
+        }
+      });
+
+      emptyState.classList.toggle('hidden', shown > 0);
+
+      /* A tile that was display:none has no box, so it can't have been
+         played yet. Now that it is back in the layout, play it. */
+      settle();
+    });
+  });
+
+  /* ---- Lightbox -------------------------------------------------------- */
+  var lb = document.getElementById('lightbox');
+  var lbImg = document.getElementById('lbImg');
+  var lbCap = document.getElementById('lbCap');
+  var lbClose = document.getElementById('lbClose');
+  var lastTrigger = null;
+
+  function openLightbox(src, caption, alt) {
+    lbImg.src = src;
+    lbImg.alt = alt || caption || '';
+    lbCap.textContent = caption || '';
+    lb.classList.remove('hidden');
+    lb.classList.add('flex');            /* the .flex state carries the entrance animation */
+    document.body.style.overflow = 'hidden';
+    lbClose.focus();
+  }
+  function closeLightbox() {
+    /* Closes immediately rather than fading out. A deferred close risks
+       leaving a full-screen overlay on top of the page if the timer is
+       throttled, which is a far worse failure than a missing fade. */
+    lb.classList.add('hidden');
+    lb.classList.remove('flex');
+    lbImg.src = '';
+    document.body.style.overflow = '';
+    if (lastTrigger) lastTrigger.focus();
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.lightbox-trigger'), function (btn) {
+    btn.addEventListener('click', function () {
+      lastTrigger = btn;
+      var img = btn.querySelector('img');
+      openLightbox(btn.dataset.src, btn.dataset.caption, img ? img.alt : '');
+    });
+  });
+
+  lbClose.addEventListener('click', closeLightbox);
+  lb.addEventListener('click', function (e) { if (e.target === lb) closeLightbox(); });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (!lb.classList.contains('hidden')) closeLightbox();
+    else if (!menu.classList.contains('hidden')) closeMenu();
+  });
+
+  /* ---- Enquiry form: validate, then hand off to the mail client -------- */
+  var form = document.getElementById('enquiry');
+  var note = document.getElementById('formNote');
+
+  function setError(field, message) {
+    var p = form.querySelector('.err[data-for="' + field.id + '"]');
+    if (message) {
+      p.textContent = message;
+      p.classList.remove('hidden');
+      field.classList.add('border-brandLift');
+      field.setAttribute('aria-invalid', 'true');
+    } else {
+      p.textContent = '';
+      p.classList.add('hidden');
+      field.classList.remove('border-brandLift');
+      field.removeAttribute('aria-invalid');
+    }
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    var name = document.getElementById('name');
+    var email = document.getElementById('email');
+    var message = document.getElementById('message');
+    var type = document.getElementById('type');
+    var date = document.getElementById('date');
+
+    var firstBad = null;
+
+    if (!name.value.trim()) { setError(name, 'Please tell us your name.'); firstBad = firstBad || name; }
+    else setError(name, null);
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) { setError(email, 'Please enter a valid email address.'); firstBad = firstBad || email; }
+    else setError(email, null);
+
+    if (!message.value.trim()) { setError(message, 'A sentence or two is enough to get started.'); firstBad = firstBad || message; }
+    else setError(message, null);
+
+    if (firstBad) { firstBad.focus(); return; }
+
+    var subject = 'Shoot enquiry — ' + type.value + (date.value ? ' — ' + date.value : '');
+    var body =
+      'Name: ' + name.value.trim() + '\n' +
+      'Email: ' + email.value.trim() + '\n' +
+      'Shoot type: ' + type.value + '\n' +
+      'Date: ' + (date.value || 'Not set yet') + '\n\n' +
+      message.value.trim() + '\n';
+
+    window.location.href = 'mailto:pixel8.za@gmail.com'
+      + '?subject=' + encodeURIComponent(subject)
+      + '&body=' + encodeURIComponent(body);
+
+    note.textContent = 'Opening your email app — press send to finish. If nothing happens, email pixel8.za@gmail.com directly.';
+  });
+})();
+</script>
+
+</body>
+</html>
